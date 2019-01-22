@@ -1,0 +1,13 @@
+* text=lf
+
+*.java text
+*.properties text
+*.md text
+*.gradle text
+*.gradle.kts text
+
+*.bat text eol=crlf
+*.sh text
+gradlew text
+
+*.jar binary

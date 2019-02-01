@@ -3,6 +3,7 @@
 .gradle
 /build
 /buildSrc/build
+/apigen/build
 
 # IDEA
 # ----
@@ -24,6 +25,7 @@
 *.settings
 /bin
 /buildSrc/bin
+/apigen/bin
 
 # NetBeans
 # --------

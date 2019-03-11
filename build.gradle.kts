@@ -10,7 +10,7 @@ repositories {
 }
 
 group = "org.zaproxy.gradle"
-version = "0.1.0"
+version = "0.2.0-SNAPSHOT"
 
 dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.8")

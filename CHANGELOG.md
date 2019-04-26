@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+ - Remove features related to `ZapVersions.xml` file, the data will be generated in/by
+ the repository containing the marketplace data. The following tasks and extensions will
+ no longer be available:
+   - Task added:
+     - `generateZapVersionsFile`
+   - Tasks provided:
+     - `org.zaproxy.gradle.addon.zapversions.tasks.AggregateZapVersionsFiles`
+     - `org.zaproxy.gradle.addon.zapversions.tasks.GenerateZapVersionsFile`
+     - `org.zaproxy.gradle.addon.zapversions.tasks.UpdateZapVersionsFile`
+   - Extension:
+     - `zapVersions` (in `zapAddOn`)
+
 ## [0.1.0] - 2019-03-11
 First alpha release.
 

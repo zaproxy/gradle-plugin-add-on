@@ -59,8 +59,6 @@ import org.zaproxy.gradle.addon.misc.InstallAddOn;
 import org.zaproxy.gradle.addon.misc.UninstallAddOn;
 import org.zaproxy.gradle.addon.wiki.WikiGenExtension;
 import org.zaproxy.gradle.addon.wiki.tasks.GenerateWiki;
-import org.zaproxy.gradle.addon.zapversions.ZapVersionsExtension;
-import org.zaproxy.gradle.addon.zapversions.tasks.GenerateZapVersionsFile;
 
 /** The plugin to help build ZAP add-ons. */
 public class AddOnPlugin implements Plugin<Project> {
@@ -74,13 +72,6 @@ public class AddOnPlugin implements Plugin<Project> {
      * <p>Accessible through the {@value #MAIN_EXTENSION_NAME} extension.
      */
     public static final String MANIFEST_EXTENSION_NAME = "manifest";
-
-    /**
-     * The name of the extension to configure the {@code ZapVersions.xml} file.
-     *
-     * <p>Accessible through the {@value #MAIN_EXTENSION_NAME} extension.
-     */
-    public static final String ZAP_VERSIONS_EXTENSION_NAME = "zapVersions";
 
     /**
      * The name of the extension to configure the generation of wiki files.
@@ -162,17 +153,6 @@ public class AddOnPlugin implements Plugin<Project> {
 
     static final String GENERATE_MANIFEST_TASK_DESC =
             "Generates the manifest (ZapAddOn.xml) for the ZAP add-on.";
-
-    /**
-     * The name of the task that generates the versions file ({@code ZapVersions.xml}) for the
-     * add-on.
-     *
-     * @see org.zaproxy.gradle.addon.zapversions.tasks.GenerateZapVersionsFile
-     */
-    public static final String GENERATE_ZAP_VERSIONS_TASK_NAME = "generateZapVersionsFile";
-
-    static final String GENERATE_ZAP_VERSIONS_TASK_DESC =
-            "Generates the ZapVersions.xml file for the ZAP add-on.";
 
     /**
      * The name of the task that generates the API client files for the ZAP add-on.
@@ -260,7 +240,6 @@ public class AddOnPlugin implements Plugin<Project> {
                             setUpAddOnFiles(project, extension);
                             setUpAddOn(project, extension, zapAddOnBuildDir);
                             setUpJavaHelp(project, extension, zapAddOnBuildDir);
-                            setUpZapVersions(project, extension, zapAddOnBuildDir);
                             setUpMiscTasks(project, extension);
                             setUpApiClientGen(project, extension);
                         });
@@ -617,37 +596,6 @@ public class AddOnPlugin implements Plugin<Project> {
                                         t.into(wikiGenExtension.getWikiDir());
                                     });
                 });
-    }
-
-    private static void setUpZapVersions(
-            Project project, AddOnPluginExtension extension, DirectoryProperty zapAddOnBuildDir) {
-        ZapVersionsExtension zapVersionsExtension =
-                ((ExtensionAware) extension)
-                        .getExtensions()
-                        .create(ZAP_VERSIONS_EXTENSION_NAME, ZapVersionsExtension.class, project);
-        zapVersionsExtension
-                .getFile()
-                .set(zapAddOnBuildDir.file(GenerateZapVersionsFile.ZAP_VERSIONS_XML));
-
-        project.getTasks()
-                .register(
-                        GENERATE_ZAP_VERSIONS_TASK_NAME,
-                        GenerateZapVersionsFile.class,
-                        t -> {
-                            t.setDescription(GENERATE_ZAP_VERSIONS_TASK_DESC);
-                            t.setGroup(LifecycleBasePlugin.BUILD_GROUP);
-
-                            t.getAddOnId().set(extension.getAddOnId());
-                            t.getAddOn()
-                                    .set(
-                                            project.getTasks()
-                                                    .named(JAR_ZAP_ADD_ON_TASK_NAME, Jar.class)
-                                                    .flatMap(Jar::getArchiveFile));
-                            t.getDownloadUrl().set(zapVersionsExtension.getDownloadUrl());
-                            t.getChecksumAlgorithm()
-                                    .set(zapVersionsExtension.getChecksumAlgorithm());
-                            t.getFile().set(zapVersionsExtension.getFile());
-                        });
     }
 
     private static void setUpMiscTasks(Project project, AddOnPluginExtension extension) {

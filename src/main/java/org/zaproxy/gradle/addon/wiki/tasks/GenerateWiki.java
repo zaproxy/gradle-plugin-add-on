@@ -43,6 +43,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.zaproxy.gradle.addon.wiki.internal.SourceFile;
 import org.zaproxy.gradle.addon.wiki.internal.WikiGenerationException;
 import org.zaproxy.gradle.addon.wiki.internal.WikiGenerator;
+import org.zaproxy.gradle.addon.wiki.internal.WikiGeneratorUtils;
 import org.zaproxy.gradle.addon.wiki.internal.WikiTocGenerator;
 
 /** A task to generate the wiki files from the help of the add-on. */
@@ -134,21 +135,24 @@ public class GenerateWiki extends DefaultTask {
     }
 
     private static URL getUrl(ScanResult scanResult, String path) {
-        ResourceList resources = scanResult.getResourcesWithPath(path);
+        String normalisedPath = WikiGeneratorUtils.normaliseFileSystemPath(path);
+        ResourceList resources = scanResult.getResourcesWithPath(normalisedPath);
         if (resources.isEmpty()) {
-            throw new WikiGenerationException("File not found in provided JAR: " + path);
+            throw new WikiGenerationException("File not found in provided JAR: " + normalisedPath);
         }
         return resources.get(0).getURL();
     }
 
     private static Set<SourceFile> createSourceFiles(String contentsDir, ScanResult scanResult) {
+        String normalisedContentsDir = WikiGeneratorUtils.normaliseFileSystemPath(contentsDir);
         Set<SourceFile> sourceFiles = new HashSet<>();
         for (Resource file :
                 scanResult.getResourcesMatchingPattern(
-                        Pattern.compile(Pattern.quote(contentsDir) + ".*\\.html"))) {
+                        Pattern.compile(Pattern.quote(normalisedContentsDir) + ".*\\.html"))) {
             sourceFiles.add(
                     new SourceFile(
-                            file.getURL(), file.getPath().substring(contentsDir.length() + 1)));
+                            file.getURL(),
+                            file.getPath().substring(normalisedContentsDir.length() + 1)));
         }
         return sourceFiles;
     }

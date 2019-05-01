@@ -22,6 +22,7 @@ package org.zaproxy.gradle.addon.wiki.internal;
 import com.overzealous.remark.Options;
 import com.overzealous.remark.Remark;
 import java.io.BufferedInputStream;
+import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -158,7 +159,9 @@ public class WikiGenerator {
 
     private static void createWikiPage(
             SourceFile sourceFile, Path destWikiFile, LinkConversionHandler linkConversionHandler) {
-        try (Writer writer = Files.newBufferedWriter(destWikiFile, StandardCharsets.UTF_8);
+        try (Writer writer =
+                        new LineFeedWriter(
+                                Files.newBufferedWriter(destWikiFile, StandardCharsets.UTF_8));
                 InputStream is = sourceFile.getPath().openStream()) {
             Document doc = Jsoup.parse(is, "UTF-8", "http://example.com");
             convertLinks(doc, linkConversionHandler);
@@ -281,6 +284,18 @@ public class WikiGenerator {
                 return false;
             }
             return path.equals(((SourceImage) obj).path);
+        }
+    }
+
+    private static class LineFeedWriter extends FilterWriter {
+
+        protected LineFeedWriter(Writer out) {
+            super(out);
+        }
+
+        @Override
+        public void write(String str) throws IOException {
+            super.write(str.replace("\r", ""));
         }
     }
 }

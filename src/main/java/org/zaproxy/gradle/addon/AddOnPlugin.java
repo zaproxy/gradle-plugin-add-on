@@ -297,8 +297,6 @@ public class AddOnPlugin implements Plugin<Project> {
                                             .set(manifestExtension.getNotFromVersion());
                                     t.getClasspath().from(manifestExtension.getClasspath());
 
-                                    t.getClasspath().setFrom(manifestExtension.getClasspath());
-
                                     t.getOutputDir().set(manifestExtension.getOutputDir());
                                 });
         project.getTasks()

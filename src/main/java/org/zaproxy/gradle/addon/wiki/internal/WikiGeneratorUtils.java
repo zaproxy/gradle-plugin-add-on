@@ -67,7 +67,7 @@ public final class WikiGeneratorUtils {
     }
 
     private static String normalisePath(String baseDir, String path) {
-        if (!path.startsWith(baseDir)) {
+        if (!startsWithDir(path, baseDir)) {
             throw new WikiGenerationException("Path " + path + " not under base dir " + baseDir);
         }
         return path.substring(baseDir.length() + 1);
@@ -80,7 +80,7 @@ public final class WikiGeneratorUtils {
 
     public static String normalisedImagePath(String baseDir, URL url) {
         String path = extractPath(url);
-        if (path.startsWith(baseDir)) {
+        if (startsWithDir(path, baseDir)) {
             path = normalisePath(baseDir, path);
             if (path.startsWith("images")) {
                 path = path.substring("images".length() + 1);
@@ -89,5 +89,13 @@ public final class WikiGeneratorUtils {
             path = path.substring(path.lastIndexOf('/') + 1);
         }
         return path;
+    }
+
+    private static boolean startsWithDir(String path, String dir) {
+        return path.startsWith(normaliseFileSystemPath(dir));
+    }
+
+    public static String normaliseFileSystemPath(String path) {
+        return path.replace('\\', '/');
     }
 }

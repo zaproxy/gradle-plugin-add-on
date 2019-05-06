@@ -5,6 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+ - Add (opinionated) tasks to help with the release of the add-on:
+   - `org.zaproxy.gradle.addon.misc.ConvertMarkdownToHtml` - converts markdown into HTML, for the add-on manifest.
+   - `org.zaproxy.gradle.addon.misc.CreateGitHubRelease` - creates a GitHub release.
+   - `org.zaproxy.gradle.addon.misc.ExtractLatestChangesFromChangelog` - extracts the changes from the
+   latest release, for example, to be included in the GitHub release or add-on manifest (after converting to HTML).
+   - `org.zaproxy.gradle.addon.misc.PrepareAddOnNextDevIter` - prepares the next development iteration
+   of the add-on. Updates the changelog (with Unreleased section) and bumps the version of the add-on.
+   - `org.zaproxy.gradle.addon.misc.PrepareAddOnRelease` - prepares the release of the add-on. Replaces the
+   Unreleased section of the changelog with the version, release date, and link to the release.
+
 ### Changed
  - The `installZapAddOn` task will no longer depend on `uninstallZapAddOn` task, the uninstall will be
  performed by ZAP to not require the uninstallation of dependent add-ons.
@@ -26,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
      - `org.zaproxy.gradle.addon.zapversions.tasks.UpdateZapVersionsFile`
    - Extension:
      - `zapVersions` (in `zapAddOn`)
+ - Remove the task `org.zaproxy.gradle.addon.manifest.tasks.ConvertChangelogToChanges`,
+ split into two tasks (`ExtractLatestChangesFromChangelog` and `ConvertMarkdownToHtml`).
 
 ## [0.1.0] - 2019-03-11
 First alpha release.

@@ -24,6 +24,11 @@ dependencies {
     implementation("io.github.classgraph:classgraph:4.6.29")
     implementation("org.apache.commons:commons-lang3:3.8.1")
     implementation("org.zaproxy:zap-clientapi:1.6.0")
+    implementation("org.kohsuke:github-api:1.95")
+    // Include annotations used by the above library to avoid compiler warnings.
+    compileOnly("com.google.code.findbugs:findbugs-annotations:3.0.1")
+    compileOnly("com.infradna.tool:bridge-method-annotation:1.18")
+    implementation("com.github.zafarkhaja:java-semver:0.9.0")
 }
 
 tasks.jar {

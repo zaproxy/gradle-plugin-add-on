@@ -17,20 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.gradle.addon.manifest.tasks;
+package org.zaproxy.gradle.addon.misc;
 
-import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughSubscriptExtension;
-import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
-import com.vladsch.flexmark.ext.tables.TablesExtension;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.options.MutableDataSet;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.gradle.api.DefaultTask;
@@ -42,8 +35,11 @@ import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 
-/** A task that converts a changelog (in Keep a Changelog format) to manifest changes (HTML). */
-public class ConvertChangelogToChanges extends DefaultTask {
+/**
+ * A task that extracts the changes from the latest version (unreleased or not) from a changelog (in
+ * Keep a Changelog format).
+ */
+public class ExtractLatestChangesFromChangelog extends DefaultTask {
 
     private static final int CHANGELOG_CHUNK_SIZE = 20_000;
 
@@ -51,12 +47,15 @@ public class ConvertChangelogToChanges extends DefaultTask {
     private static final Pattern VERSION_LINK_PATTERN = Pattern.compile("(?m)^\\[.+]:");
 
     private final RegularFileProperty changelog;
-    private final RegularFileProperty manifestChanges;
+    private final RegularFileProperty latestChanges;
 
-    public ConvertChangelogToChanges() {
+    public ExtractLatestChangesFromChangelog() {
         ObjectFactory objects = getProject().getObjects();
         changelog = objects.fileProperty();
-        manifestChanges = objects.fileProperty();
+        latestChanges = objects.fileProperty();
+
+        setGroup("ZAP Add-On Misc");
+        setDescription("Extracts the latest changes from the changelog into a file.");
     }
 
     @InputFile
@@ -66,31 +65,14 @@ public class ConvertChangelogToChanges extends DefaultTask {
     }
 
     @OutputFile
-    public RegularFileProperty getManifestChanges() {
-        return manifestChanges;
+    public RegularFileProperty getLatestChanges() {
+        return latestChanges;
     }
 
     @TaskAction
-    public void convert() throws IOException {
-        MutableDataSet options =
-                new MutableDataSet()
-                        .set(TablesExtension.COLUMN_SPANS, false)
-                        .set(TablesExtension.APPEND_MISSING_COLUMNS, true)
-                        .set(TablesExtension.DISCARD_EXTRA_COLUMNS, true)
-                        .set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, true)
-                        .set(
-                                Parser.EXTENSIONS,
-                                Arrays.asList(
-                                        StrikethroughSubscriptExtension.create(),
-                                        TablesExtension.create(),
-                                        TaskListExtension.create()));
-
-        Parser parser = Parser.builder(options).build();
-        HtmlRenderer renderer = HtmlRenderer.builder(options).build();
-
-        String changes = getChanges(changelog.get().getAsFile().toPath());
-        try (Writer writer = Files.newBufferedWriter(manifestChanges.get().getAsFile().toPath())) {
-            renderer.render(parser.parse(changes), writer);
+    public void extract() throws IOException {
+        try (Writer writer = Files.newBufferedWriter(latestChanges.get().getAsFile().toPath())) {
+            writer.write(getChanges(changelog.get().getAsFile().toPath()).trim());
         }
     }
 

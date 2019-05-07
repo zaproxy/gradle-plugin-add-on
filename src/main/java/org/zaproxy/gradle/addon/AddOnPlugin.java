@@ -630,17 +630,15 @@ public class AddOnPlugin implements Plugin<Project> {
                                                     .getFiles());
                         });
 
-        TaskProvider<UninstallAddOn> uninstallAddOn =
-                project.getTasks()
-                        .register(
-                                UNINSTALL_ADD_ON_TASK_NAME,
-                                UninstallAddOn.class,
-                                t -> {
-                                    t.setDescription(UNINSTALL_ADD_ON_TASK_DESC);
-                                    t.setGroup(ZAP_TASK_GROUP_NAME);
-                                    t.getAddOnId().set(extension.getAddOnId());
-                                });
-        jarZapAddOn.configure(t -> t.mustRunAfter(uninstallAddOn));
+        project.getTasks()
+                .register(
+                        UNINSTALL_ADD_ON_TASK_NAME,
+                        UninstallAddOn.class,
+                        t -> {
+                            t.setDescription(UNINSTALL_ADD_ON_TASK_DESC);
+                            t.setGroup(ZAP_TASK_GROUP_NAME);
+                            t.getAddOnId().set(extension.getAddOnId());
+                        });
 
         project.getTasks()
                 .register(
@@ -650,7 +648,6 @@ public class AddOnPlugin implements Plugin<Project> {
                             t.setDescription(INSTALL_ADD_ON_TASK_DESC);
                             t.setGroup(ZAP_TASK_GROUP_NAME);
 
-                            t.dependsOn(uninstallAddOn);
                             t.getAddOn().set(jarFile);
                         });
     }

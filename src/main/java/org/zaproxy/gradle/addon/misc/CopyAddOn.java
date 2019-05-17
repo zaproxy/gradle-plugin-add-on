@@ -36,14 +36,14 @@ import org.zaproxy.gradle.addon.internal.Constants;
 /**
  * A task to copy the add-on to a directory.
  *
- * <p>Defaults to {@code $rootDir/../zaproxy/src/plugin/}.
+ * <p>Defaults to {@code $rootDir/../zaproxy/zap/src/main/dist/plugin/}.
  *
  * <p>Existing add-ons with the same ID are removed from the destination directory before copying
  * the add-on, to ensure ZAP uses the copied add-on.
  */
 public class CopyAddOn extends Copy {
 
-    private static final String DEFAULT_DIR_PATH = "../zaproxy/src/plugin/";
+    private static final String DEFAULT_DIR_PATH = "../zaproxy/zap/src/main/dist/plugin/";
 
     private final Property<String> addOnId;
 

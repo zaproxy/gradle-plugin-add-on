@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  performed by ZAP to not require the uninstallation of dependent add-ons.
  - The `jarZapAddOn` task no longer must run after `uninstallZapAddOn` task, ZAP now copies the add-on
  to local plugin directory so the add-on built should no longer conflict with the one being uninstalled.
+ - Update default path of `CopyAddOn` task to the new location in zaproxy project (from
+ `$rootDir/../zaproxy/src/plugin/` to `$rootDir/../zaproxy/zap/src/main/dist/plugin/`).
 
 ### Fixed
 - Fix wiki generation on Windows, which failed to find the help files.

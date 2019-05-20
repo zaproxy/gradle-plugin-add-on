@@ -6,15 +6,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
- - Add (opinionated) tasks to help with the release of the add-on:
-   - `org.zaproxy.gradle.addon.misc.ConvertMarkdownToHtml` - converts markdown into HTML, for the add-on manifest.
-   - `org.zaproxy.gradle.addon.misc.CreateGitHubRelease` - creates a GitHub release.
-   - `org.zaproxy.gradle.addon.misc.ExtractLatestChangesFromChangelog` - extracts the changes from the
-   latest release, for example, to be included in the GitHub release or add-on manifest (after converting to HTML).
-   - `org.zaproxy.gradle.addon.misc.PrepareAddOnNextDevIter` - prepares the next development iteration
-   of the add-on. Updates the changelog (with Unreleased section) and bumps the version of the add-on.
-   - `org.zaproxy.gradle.addon.misc.PrepareAddOnRelease` - prepares the release of the add-on. Replaces the
-   Unreleased section of the changelog with the version, release date, and link to the release.
+Add (opinionated) tasks and extension properties to help with the release of the add-on.
+It makes use of a changelog, in Keep a Changelog format.
+
+#### Extension
+ - Add the following properties to `zapAddOn` extension:
+   - `changelog` to configure the location of the changelog (defaults to `CHANGELOG.md`).
+   - `releaseLink` to configure the release link added to the changelog when preparing the release.
+   - `unreleasedLink` to configure the unreleased link added to the changelog when preparing the next development
+   iteration.
+
+#### Tasks
+Added by the plugin:
+ - `extractLatestChanges` - to extract the latest changes from the changelog, kept in markdown.
+ - `generateManifestChanges` - to generate the manifest changes, by converting the latest changes to HTML. Needs to be
+ set to the `changesFile` of the `manifest`.
+ - `prepareAddOnRelease` - to prepare the release of the add-on.
+ - `prepareAddOnNextDevIter` - to prepare the next development iteration of the add-on.
+
+Provided by the plugin:
+ - `org.zaproxy.gradle.addon.misc.ConvertMarkdownToHtml` - converts markdown into HTML, for the add-on manifest.
+ - `org.zaproxy.gradle.addon.misc.CreateGitHubRelease` - creates a GitHub release.
+ - `org.zaproxy.gradle.addon.misc.ExtractLatestChangesFromChangelog` - extracts the changes from the
+ latest release, for example, to be included in the GitHub release or add-on manifest (after converting to HTML).
+ - `org.zaproxy.gradle.addon.misc.PrepareAddOnNextDevIter` - prepares the next development iteration
+ of the add-on. Updates the changelog (with Unreleased section) and bumps the version of the add-on.
+ - `org.zaproxy.gradle.addon.misc.PrepareAddOnRelease` - prepares the release of the add-on. Replaces the
+ Unreleased section of the changelog with the version, release date, and link to the release.
 
 ### Changed
  - The `installZapAddOn` task will no longer depend on `uninstallZapAddOn` task, the uninstall will be

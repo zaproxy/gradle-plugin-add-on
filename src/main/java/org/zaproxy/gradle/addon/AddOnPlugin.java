@@ -53,9 +53,13 @@ import org.zaproxy.gradle.addon.internal.Constants;
 import org.zaproxy.gradle.addon.jh.tasks.JavaHelpIndexer;
 import org.zaproxy.gradle.addon.manifest.ManifestExtension;
 import org.zaproxy.gradle.addon.manifest.tasks.GenerateManifestFile;
+import org.zaproxy.gradle.addon.misc.ConvertMarkdownToHtml;
 import org.zaproxy.gradle.addon.misc.CopyAddOn;
 import org.zaproxy.gradle.addon.misc.DeployAddOn;
+import org.zaproxy.gradle.addon.misc.ExtractLatestChangesFromChangelog;
 import org.zaproxy.gradle.addon.misc.InstallAddOn;
+import org.zaproxy.gradle.addon.misc.PrepareAddOnNextDevIter;
+import org.zaproxy.gradle.addon.misc.PrepareAddOnRelease;
 import org.zaproxy.gradle.addon.misc.UninstallAddOn;
 import org.zaproxy.gradle.addon.wiki.WikiGenExtension;
 import org.zaproxy.gradle.addon.wiki.tasks.GenerateWiki;
@@ -143,6 +147,37 @@ public class AddOnPlugin implements Plugin<Project> {
 
     static final String INSTALL_ADD_ON_TASK_DESC =
             "Installs the add-on into ZAP, listening on 8080 by default.";
+
+    /**
+     * The name of the task that extracts the changes from the latest version of the changelog of
+     * the add-on.
+     *
+     * @see org.zaproxy.gradle.addon.misc.ExtractLatestChangesFromChangelog
+     */
+    public static final String EXTRACT_LATEST_CHANGES_TASK_NAME = "extractLatestChanges";
+
+    /**
+     * The name of the task that generates the changes for the manifest of the add-on, previously
+     * extracted from the changelog.
+     *
+     * @see org.zaproxy.gradle.addon.misc.ConvertMarkdownToHtml
+     * @see #EXTRACT_LATEST_CHANGES_TASK_NAME
+     */
+    public static final String GENERATE_MANIFEST_CHANGES_TASK_NAME = "generateManifestChanges";
+
+    /**
+     * The name of the task that prepares the release of the add-on.
+     *
+     * @see org.zaproxy.gradle.addon.misc.PrepareAddOnRelease
+     */
+    public static final String PREPARE_ADD_ON_RELEASE_TASK_NAME = "prepareAddOnRelease";
+
+    /**
+     * The name of the task that prepares the next development iteration of the add-on.
+     *
+     * @see org.zaproxy.gradle.addon.misc.PrepareAddOnNextDevIter
+     */
+    public static final String PREPARE_ADD_ON_NEXT_DEV_ITER_TASK_NAME = "prepareAddOnNextDevIter";
 
     /**
      * The name of the task that generates the add-on manifest ({@code ZapAddOn.xml}).
@@ -240,7 +275,7 @@ public class AddOnPlugin implements Plugin<Project> {
                             setUpAddOnFiles(project, extension);
                             setUpAddOn(project, extension, zapAddOnBuildDir);
                             setUpJavaHelp(project, extension, zapAddOnBuildDir);
-                            setUpMiscTasks(project, extension);
+                            setUpMiscTasks(project, extension, zapAddOnBuildDir);
                             setUpApiClientGen(project, extension);
                         });
     }
@@ -596,7 +631,8 @@ public class AddOnPlugin implements Plugin<Project> {
                 });
     }
 
-    private static void setUpMiscTasks(Project project, AddOnPluginExtension extension) {
+    private static void setUpMiscTasks(
+            Project project, AddOnPluginExtension extension, DirectoryProperty zapAddOnBuildDir) {
         project.getTasks()
                 .withType(CopyAddOn.class, t -> t.getAddOnId().set(extension.getAddOnId()));
 
@@ -649,6 +685,50 @@ public class AddOnPlugin implements Plugin<Project> {
                             t.setGroup(ZAP_TASK_GROUP_NAME);
 
                             t.getAddOn().set(jarFile);
+                        });
+
+        Provider<ExtractLatestChangesFromChangelog> extractLatestChanges =
+                project.getTasks()
+                        .register(
+                                EXTRACT_LATEST_CHANGES_TASK_NAME,
+                                ExtractLatestChangesFromChangelog.class,
+                                t -> {
+                                    t.getChangelog().set(extension.getChangelog());
+                                    t.getLatestChanges()
+                                            .set(zapAddOnBuildDir.file("latest-changes.md"));
+                                });
+
+        project.getTasks()
+                .register(
+                        GENERATE_MANIFEST_CHANGES_TASK_NAME,
+                        ConvertMarkdownToHtml.class,
+                        t -> {
+                            t.getMarkdown()
+                                    .set(
+                                            extractLatestChanges.flatMap(
+                                                    task -> task.getLatestChanges()));
+                            t.getHtml().set(zapAddOnBuildDir.file("manifest-changes.html"));
+                        });
+
+        project.getTasks()
+                .register(
+                        PREPARE_ADD_ON_RELEASE_TASK_NAME,
+                        PrepareAddOnRelease.class,
+                        t -> {
+                            t.getChangelog().set(extension.getChangelog());
+                            t.getCurrentVersion().set(extension.getAddOnVersion());
+                            t.getReleaseLink().set(extension.getReleaseLink());
+                        });
+
+        project.getTasks()
+                .register(
+                        PREPARE_ADD_ON_NEXT_DEV_ITER_TASK_NAME,
+                        PrepareAddOnNextDevIter.class,
+                        t -> {
+                            t.getChangelog().set(extension.getChangelog());
+                            t.getBuildFile().set(project.file(project.getBuildFile().getName()));
+                            t.getCurrentVersion().set(extension.getAddOnVersion());
+                            t.getUnreleasedLink().set(extension.getUnreleasedLink());
                         });
     }
 

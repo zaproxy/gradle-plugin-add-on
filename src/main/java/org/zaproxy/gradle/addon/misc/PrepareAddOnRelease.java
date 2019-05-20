@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.InvalidUserDataException;
@@ -43,19 +44,33 @@ import org.gradle.api.tasks.TaskAction;
  * A task that prepares the release of an add-on.
  *
  * <p>Replaces the Unreleased section and adds the release link to the changelog.
+ *
+ * <p>The release link can have tokens to refer to current and previous versions, which are replaced
+ * when adding the link.
  */
 public class PrepareAddOnRelease extends DefaultTask {
 
-    private static final Pattern VERSION_LINK_PATTERN = Pattern.compile("\\[.+]:");
+    public static final String CURRENT_VERSION_TOKEN = "@CURRENT_VERSION@";
+    public static final String PREVIOUS_VERSION_TOKEN = "@PREVIOUS_VERSION@";
 
-    private final Property<String> version;
+    private static final Pattern UNRELEASED_VERSION_PATTERN =
+            Pattern.compile("^## \\[?Unreleased]?");
+    private static final Pattern VERSION_SECTION_PATTERN = Pattern.compile("^## \\[?(.+?)]? -");
+    private static final Pattern VERSION_LINK_PATTERN = Pattern.compile("^\\[.+]:");
+
+    private final Property<String> currentVersion;
+    private final Property<String> currentVersionToken;
+    private final Property<String> previousVersionToken;
     private final Property<String> releaseLink;
     private final Property<String> releaseDate;
     private final RegularFileProperty changelog;
+    private String previousVersion;
 
     public PrepareAddOnRelease() {
         ObjectFactory objects = getProject().getObjects();
-        this.version = objects.property(String.class);
+        this.currentVersion = objects.property(String.class);
+        this.currentVersionToken = objects.property(String.class).value(CURRENT_VERSION_TOKEN);
+        this.previousVersionToken = objects.property(String.class).value(PREVIOUS_VERSION_TOKEN);
         this.releaseLink = objects.property(String.class);
         this.releaseDate = objects.property(String.class).value(LocalDate.now().toString());
         this.changelog = objects.fileProperty();
@@ -65,8 +80,18 @@ public class PrepareAddOnRelease extends DefaultTask {
     }
 
     @Input
-    public Property<String> getVersion() {
-        return version;
+    public Property<String> getCurrentVersion() {
+        return currentVersion;
+    }
+
+    @Input
+    public Property<String> getCurrentVersionToken() {
+        return currentVersionToken;
+    }
+
+    @Input
+    public Property<String> getPreviousVersionToken() {
+        return previousVersionToken;
     }
 
     @Input
@@ -97,13 +122,25 @@ public class PrepareAddOnRelease extends DefaultTask {
                 BufferedWriter writer = Files.newBufferedWriter(updatedChangelog)) {
             boolean lastLineEmpty = false;
             boolean insertLink = true;
+            boolean extractPreviousVersion = releaseLink.get().contains(previousVersionToken.get());
             String line;
             while ((line = reader.readLine()) != null) {
+                if (extractPreviousVersion) {
+                    Matcher version = VERSION_SECTION_PATTERN.matcher(line);
+                    if (version.find()) {
+                        previousVersion = version.group(1).trim();
+                        extractPreviousVersion = false;
+                    }
+                }
                 if (insertLink && VERSION_LINK_PATTERN.matcher(line).find()) {
-                    writeReleaseLink(writer);
+                    if (line.startsWith("[Unreleased]:")) {
+                        line = buildReleaseLink();
+                    } else {
+                        writeReleaseLink(writer);
+                    }
                     insertLink = false;
-                } else if (replaceUnreleased && line.startsWith("## Unreleased")) {
-                    line = "## [" + version.get() + "] - " + releaseDate.get();
+                } else if (replaceUnreleased && UNRELEASED_VERSION_PATTERN.matcher(line).find()) {
+                    line = "## [" + currentVersion.get() + "] - " + releaseDate.get();
                     replaceUnreleased = false;
                 }
                 writer.write(line);
@@ -126,7 +163,24 @@ public class PrepareAddOnRelease extends DefaultTask {
         Files.copy(updatedChangelog, changelogPath, StandardCopyOption.REPLACE_EXISTING);
     }
 
+    private String buildReleaseLink() {
+        return "[" + currentVersion.get() + "]: " + replaceVersionTokens(releaseLink.get());
+    }
+
     private void writeReleaseLink(Writer writer) throws IOException {
-        writer.write("[" + version.get() + "]: " + releaseLink.get() + "\n");
+        writer.write(buildReleaseLink() + "\n");
+    }
+
+    private String replaceVersionTokens(String link) {
+        String replacedLink = link.replace(currentVersionToken.get(), currentVersion.get());
+        if (link.contains(previousVersionToken.get())) {
+            if (previousVersion == null) {
+                throw new InvalidUserDataException(
+                        "The changelog does not contain a released version to add to the release link: "
+                                + releaseLink.get());
+            }
+            replacedLink = replacedLink.replace(previousVersionToken.get(), previousVersion);
+        }
+        return replacedLink;
     }
 }

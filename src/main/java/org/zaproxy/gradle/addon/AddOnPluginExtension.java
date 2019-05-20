@@ -21,18 +21,23 @@ package org.zaproxy.gradle.addon;
 
 import javax.inject.Inject;
 import org.gradle.api.Project;
+import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
 
 /** The entry extension of the plugin. */
 public class AddOnPluginExtension {
 
     private static final String DEFAULT_ZAP_VERSION = "2.7.0";
+    private static final String DEFAULT_CHANGELOG_NAME = "CHANGELOG.md";
 
     private final Property<String> addOnId;
     private final Property<String> addOnName;
     private final Property<AddOnStatus> addOnStatus;
     private final Property<String> addOnVersion;
     private final Property<String> zapVersion;
+    private final RegularFileProperty changelog;
+    private final Property<String> releaseLink;
+    private final Property<String> unreleasedLink;
 
     @Inject
     public AddOnPluginExtension(Project project) {
@@ -44,6 +49,11 @@ public class AddOnPluginExtension {
         this.addOnVersion = project.getObjects().property(String.class);
         this.addOnVersion.set(project.provider(() -> project.getVersion().toString()));
         this.zapVersion = project.getObjects().property(String.class).value(DEFAULT_ZAP_VERSION);
+        this.changelog = project.getObjects().fileProperty();
+        this.changelog.value(
+                project.getLayout().getProjectDirectory().file(DEFAULT_CHANGELOG_NAME));
+        this.releaseLink = project.getObjects().property(String.class);
+        this.unreleasedLink = project.getObjects().property(String.class);
     }
 
     public Property<String> getAddOnId() {
@@ -64,5 +74,17 @@ public class AddOnPluginExtension {
 
     public Property<String> getZapVersion() {
         return zapVersion;
+    }
+
+    public RegularFileProperty getChangelog() {
+        return changelog;
+    }
+
+    public Property<String> getReleaseLink() {
+        return releaseLink;
+    }
+
+    public Property<String> getUnreleasedLink() {
+        return unreleasedLink;
     }
 }

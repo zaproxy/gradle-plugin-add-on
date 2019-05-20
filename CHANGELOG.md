@@ -41,6 +41,7 @@ Provided by the plugin:
  to local plugin directory so the add-on built should no longer conflict with the one being uninstalled.
  - Update default path of `CopyAddOn` task to the new location in zaproxy project (from
  `$rootDir/../zaproxy/src/plugin/` to `$rootDir/../zaproxy/zap/src/main/dist/plugin/`).
+ - Update dependencies.
 
 ### Fixed
 - Fix wiki generation on Windows, which failed to find the help files.

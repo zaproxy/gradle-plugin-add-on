@@ -20,7 +20,6 @@ dependencies {
     implementation("com.vladsch.flexmark:flexmark-ext-gfm-strikethrough:$flexmarkVersion")
     implementation("com.vladsch.flexmark:flexmark-ext-gfm-tasklist:$flexmarkVersion")
     implementation("com.vladsch.flexmark:flexmark-ext-tables:$flexmarkVersion")
-    implementation("commons-codec:commons-codec:1.12")
     implementation("io.github.classgraph:classgraph:4.8.36")
     implementation("org.apache.commons:commons-lang3:3.9")
     implementation("org.zaproxy:zap-clientapi:1.6.0")

@@ -62,6 +62,10 @@ public class Manifest implements Serializable {
     public String changes;
 
     @JsonProperty
+    @JsonInclude(value = Include.NON_EMPTY)
+    public String repo;
+
+    @JsonProperty
     @JsonInclude(value = Include.NON_NULL)
     public Classnames classnames;
 

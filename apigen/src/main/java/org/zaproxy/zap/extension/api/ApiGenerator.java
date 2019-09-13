@@ -42,6 +42,8 @@ public class ApiGenerator {
     private static final String PYTHON_OUTPUT_DIR = "zap-api-python/src/zapv2/";
     private static final String NODE_OUTPUT_DIR = "zap-api-nodejs/src/";
     private static final String RUST_OUTPUT_DIR = "zap-api-rust/src/";
+    private static final String DOTNET_OUTPUT_DIR =
+            "zap-api-dotnet/src/OWASPZAPDotNetAPI/OWASPZAPDotNetAPI/Generated";
 
     private static Path baseDir;
 
@@ -100,7 +102,8 @@ public class ApiGenerator {
                         wrapper(NodeJSAPIGenerator.class, NODE_OUTPUT_DIR),
                         wrapper(PhpAPIGenerator.class, PHP_OUTPUT_DIR),
                         wrapper(PythonAPIGenerator.class, PYTHON_OUTPUT_DIR),
-                        wrapper(RustAPIGenerator.class, RUST_OUTPUT_DIR)
+                        wrapper(RustAPIGenerator.class, RUST_OUTPUT_DIR),
+                        wrapper(DotNetAPIGenerator.class, DOTNET_OUTPUT_DIR)
                         // wrapper(WikiAPIGenerator.class, "zaproxy-wiki")
                         );
         ResourceBundle bundle =

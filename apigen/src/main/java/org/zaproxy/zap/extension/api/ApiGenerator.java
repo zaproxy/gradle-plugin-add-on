@@ -98,12 +98,12 @@ public class ApiGenerator {
     private static void generate(ApiImplementor api) {
         List<ApiGeneratorWrapper> generators =
                 Arrays.asList(
-                		wrapper(DotNetAPIGenerator.class, DOTNET_OUTPUT_DIR),
+                        wrapper(DotNetAPIGenerator.class, DOTNET_OUTPUT_DIR),
                         wrapper(JavaAPIGenerator.class, JAVA_OUTPUT_DIR),
                         wrapper(NodeJSAPIGenerator.class, NODE_OUTPUT_DIR),
                         wrapper(PhpAPIGenerator.class, PHP_OUTPUT_DIR),
                         wrapper(PythonAPIGenerator.class, PYTHON_OUTPUT_DIR),
-                        wrapper(RustAPIGenerator.class, RUST_OUTPUT_DIR)                        
+                        wrapper(RustAPIGenerator.class, RUST_OUTPUT_DIR)
                         // wrapper(WikiAPIGenerator.class, "zaproxy-wiki")
                         );
         ResourceBundle bundle =

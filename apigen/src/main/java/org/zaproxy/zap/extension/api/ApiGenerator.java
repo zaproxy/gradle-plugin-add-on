@@ -36,14 +36,14 @@ public class ApiGenerator {
 
     private static final String CONF_FILE = "apigen.properties";
 
+    private static final String DOTNET_OUTPUT_DIR =
+            "zap-api-dotnet/src/OWASPZAPDotNetAPI/OWASPZAPDotNetAPI/Generated";
     private static final String JAVA_OUTPUT_DIR =
             "zap-api-java/subprojects/zap-clientapi/src/main/java/org/zaproxy/clientapi/gen";
     private static final String PHP_OUTPUT_DIR = "zaproxy/php/api/zapv2/src/Zap";
     private static final String PYTHON_OUTPUT_DIR = "zap-api-python/src/zapv2/";
     private static final String NODE_OUTPUT_DIR = "zap-api-nodejs/src/";
     private static final String RUST_OUTPUT_DIR = "zap-api-rust/src/";
-    private static final String DOTNET_OUTPUT_DIR =
-            "zap-api-dotnet/src/OWASPZAPDotNetAPI/OWASPZAPDotNetAPI/Generated";
 
     private static Path baseDir;
 
@@ -98,12 +98,12 @@ public class ApiGenerator {
     private static void generate(ApiImplementor api) {
         List<ApiGeneratorWrapper> generators =
                 Arrays.asList(
+                		wrapper(DotNetAPIGenerator.class, DOTNET_OUTPUT_DIR),
                         wrapper(JavaAPIGenerator.class, JAVA_OUTPUT_DIR),
                         wrapper(NodeJSAPIGenerator.class, NODE_OUTPUT_DIR),
                         wrapper(PhpAPIGenerator.class, PHP_OUTPUT_DIR),
                         wrapper(PythonAPIGenerator.class, PYTHON_OUTPUT_DIR),
-                        wrapper(RustAPIGenerator.class, RUST_OUTPUT_DIR),
-                        wrapper(DotNetAPIGenerator.class, DOTNET_OUTPUT_DIR)
+                        wrapper(RustAPIGenerator.class, RUST_OUTPUT_DIR)                        
                         // wrapper(WikiAPIGenerator.class, "zaproxy-wiki")
                         );
         ResourceBundle bundle =

@@ -81,6 +81,7 @@ public class GenerateManifestFile extends DefaultTask {
     private final Property<String> url;
     private final Property<String> changes;
     private final RegularFileProperty changesFile;
+    private final Property<String> repo;
     private final Property<Dependencies> dependencies;
     private final Property<Bundle> bundle;
     private final Property<HelpSet> helpSet;
@@ -110,6 +111,7 @@ public class GenerateManifestFile extends DefaultTask {
         this.url = objects.property(String.class);
         this.changes = objects.property(String.class);
         this.changesFile = objects.fileProperty();
+        this.repo = objects.property(String.class);
         this.dependencies = objects.property(Dependencies.class);
         this.bundle = objects.property(Bundle.class);
         this.helpSet = objects.property(HelpSet.class);
@@ -179,6 +181,12 @@ public class GenerateManifestFile extends DefaultTask {
     @Optional
     public RegularFileProperty getChangesFile() {
         return changesFile;
+    }
+
+    @Input
+    @Optional
+    public Property<String> getRepo() {
+        return repo;
     }
 
     @Nested
@@ -355,6 +363,7 @@ public class GenerateManifestFile extends DefaultTask {
                 getChangesFile().isPresent()
                         ? readContents(getChangesFile().getAsFile().get().toPath())
                         : getChanges().getOrNull();
+        manifest.repo = getRepo().getOrNull();
 
         if (getDependencies().isPresent()) {
             Dependencies dep = getDependencies().get();

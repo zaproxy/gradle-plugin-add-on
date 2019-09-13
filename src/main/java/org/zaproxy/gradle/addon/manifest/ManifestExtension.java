@@ -37,6 +37,7 @@ public class ManifestExtension {
     private final Property<String> url;
     private final Property<String> changes;
     private final RegularFileProperty changesFile;
+    private final Property<String> repo;
     private final Property<Dependencies> dependencies;
     private final Property<Bundle> bundle;
     private final Property<HelpSet> helpSet;
@@ -66,6 +67,7 @@ public class ManifestExtension {
         this.url = objects.property(String.class);
         this.changes = objects.property(String.class);
         this.changesFile = objects.fileProperty();
+        this.repo = objects.property(String.class);
         this.dependencies = objects.property(Dependencies.class);
         this.bundle = objects.property(Bundle.class);
         this.helpSet = objects.property(HelpSet.class);
@@ -103,6 +105,10 @@ public class ManifestExtension {
 
     public RegularFileProperty getChangesFile() {
         return changesFile;
+    }
+
+    public Property<String> getRepo() {
+        return repo;
     }
 
     public Property<Dependencies> getDependencies() {

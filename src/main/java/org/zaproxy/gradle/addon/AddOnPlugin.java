@@ -316,6 +316,7 @@ public class AddOnPlugin implements Plugin<Project> {
                                     t.getUrl().set(manifestExtension.getUrl());
                                     t.getChanges().set(manifestExtension.getChanges());
                                     t.getChangesFile().set(manifestExtension.getChangesFile());
+                                    t.getRepo().set(manifestExtension.getRepo());
                                     t.getDependencies().set(manifestExtension.getDependencies());
                                     t.getBundle().set(manifestExtension.getBundle());
                                     t.getHelpSet().set(manifestExtension.getHelpSet());

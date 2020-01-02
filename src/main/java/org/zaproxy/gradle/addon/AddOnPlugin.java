@@ -24,7 +24,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.gradle.api.Action;
@@ -34,6 +36,7 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFile;
@@ -51,6 +54,7 @@ import org.zaproxy.gradle.addon.apigen.ApiClientGenExtension;
 import org.zaproxy.gradle.addon.apigen.tasks.GenerateApiClientFiles;
 import org.zaproxy.gradle.addon.internal.Constants;
 import org.zaproxy.gradle.addon.jh.tasks.JavaHelpIndexer;
+import org.zaproxy.gradle.addon.manifest.BundledLibs;
 import org.zaproxy.gradle.addon.manifest.ManifestExtension;
 import org.zaproxy.gradle.addon.manifest.tasks.GenerateManifestFile;
 import org.zaproxy.gradle.addon.misc.ConvertMarkdownToHtml;
@@ -318,6 +322,7 @@ public class AddOnPlugin implements Plugin<Project> {
                                     t.getChangesFile().set(manifestExtension.getChangesFile());
                                     t.getRepo().set(manifestExtension.getRepo());
                                     t.getDependencies().set(manifestExtension.getDependencies());
+                                    t.getBundledLibs().set(manifestExtension.getBundledLibs());
                                     t.getBundle().set(manifestExtension.getBundle());
                                     t.getHelpSet().set(manifestExtension.getHelpSet());
                                     t.getClassnames().set(manifestExtension.getClassnames());
@@ -429,6 +434,32 @@ public class AddOnPlugin implements Plugin<Project> {
                                     t.with(jar);
                                     t.getManifest().from(jar.getManifest());
 
+                                    Provider<BundledLibs> bundledLibsProvider =
+                                            ((ExtensionAware) extension)
+                                                    .getExtensions()
+                                                    .getByType(ManifestExtension.class)
+                                                    .getBundledLibs();
+                                    t.from(
+                                            project.provider(
+                                                    () -> {
+                                                        if (bundledLibsProvider.isPresent()) {
+                                                            return bundledLibsProvider.map(
+                                                                    BundledLibs::getLibs);
+                                                        }
+                                                        return Collections.emptyList();
+                                                    }),
+                                            c ->
+                                                    c.into(
+                                                            (Callable<String>)
+                                                                    () ->
+                                                                            bundledLibsProvider
+                                                                                            .isPresent()
+                                                                                    ? bundledLibsProvider
+                                                                                            .get()
+                                                                                            .getDirName()
+                                                                                            .get()
+                                                                                    : ""));
+
                                     NamedDomainObjectProvider<Configuration> runtimeClasspath =
                                             project.getConfigurations()
                                                     .named(
@@ -437,20 +468,35 @@ public class AddOnPlugin implements Plugin<Project> {
                                     t.dependsOn(runtimeClasspath);
                                     t.from(
                                                     project.provider(
-                                                            () ->
-                                                                    runtimeClasspath.get()
-                                                                            .getFiles().stream()
-                                                                            .map(
-                                                                                    e ->
-                                                                                            e
-                                                                                                            .isDirectory()
-                                                                                                    ? e
-                                                                                                    : project
-                                                                                                            .zipTree(
-                                                                                                                    e))
-                                                                            .collect(
-                                                                                    Collectors
-                                                                                            .toList())))
+                                                            () -> {
+                                                                ConfigurableFileCollection
+                                                                        bundledLibs =
+                                                                                bundledLibsProvider
+                                                                                                .isPresent()
+                                                                                        ? bundledLibsProvider
+                                                                                                .get()
+                                                                                                .getLibs()
+                                                                                        : project
+                                                                                                .files();
+                                                                return runtimeClasspath.get()
+                                                                        .getFiles().stream()
+                                                                        .filter(
+                                                                                e ->
+                                                                                        !bundledLibs
+                                                                                                .contains(
+                                                                                                        e))
+                                                                        .map(
+                                                                                e ->
+                                                                                        e
+                                                                                                        .isDirectory()
+                                                                                                ? e
+                                                                                                : project
+                                                                                                        .zipTree(
+                                                                                                                e))
+                                                                        .collect(
+                                                                                Collectors
+                                                                                        .toList());
+                                                            }))
                                             .exclude(
                                                     "META-INF/*.SF",
                                                     "META-INF/*.DSA",

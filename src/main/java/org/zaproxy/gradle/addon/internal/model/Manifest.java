@@ -73,6 +73,11 @@ public class Manifest implements Serializable {
     @JsonInclude(value = Include.NON_NULL)
     public Dependencies dependencies;
 
+    @JacksonXmlElementWrapper(localName = "libs")
+    @JacksonXmlProperty(localName = "lib")
+    @JsonInclude(value = Include.NON_EMPTY)
+    public List<String> libs = new ArrayList<>();
+
     @JsonProperty
     @JsonInclude(value = Include.NON_NULL)
     public Bundle bundle;

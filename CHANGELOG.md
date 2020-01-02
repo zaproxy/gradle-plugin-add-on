@@ -12,6 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
      repo.set("https://github.com/zaproxy/zap-hud/tree/develop/")
    }
    ```
+ - Allow to bundle dependencies (instead of the add-on being an uber JAR), to properly maintain/access all
+ dependencies' JAR data (e.g. module info, manifest, services). For example, to bundle the runtime dependencies:
+   ```kts
+   manifest {
+     bundledLibs {
+       libs.from(configurations.runtimeClasspath)
+    }
+   }
+   ```
 
 ## [0.2.0] - 2019-05-20
 ### Added

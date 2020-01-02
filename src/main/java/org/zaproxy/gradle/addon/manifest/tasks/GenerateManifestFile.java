@@ -26,6 +26,7 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.MethodInfo;
 import io.github.classgraph.ScanResult;
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
@@ -62,6 +64,7 @@ import org.zaproxy.gradle.addon.AddOnStatus;
 import org.zaproxy.gradle.addon.internal.Constants;
 import org.zaproxy.gradle.addon.internal.DefaultIndenter;
 import org.zaproxy.gradle.addon.manifest.Bundle;
+import org.zaproxy.gradle.addon.manifest.BundledLibs;
 import org.zaproxy.gradle.addon.manifest.Classnames;
 import org.zaproxy.gradle.addon.manifest.Dependencies;
 import org.zaproxy.gradle.addon.manifest.Extension;
@@ -83,6 +86,7 @@ public class GenerateManifestFile extends DefaultTask {
     private final RegularFileProperty changesFile;
     private final Property<String> repo;
     private final Property<Dependencies> dependencies;
+    private final Property<BundledLibs> bundledLibs;
     private final Property<Bundle> bundle;
     private final Property<HelpSet> helpSet;
     private final Property<Classnames> classnames;
@@ -113,6 +117,7 @@ public class GenerateManifestFile extends DefaultTask {
         this.changesFile = objects.fileProperty();
         this.repo = objects.property(String.class);
         this.dependencies = objects.property(Dependencies.class);
+        this.bundledLibs = objects.property(BundledLibs.class);
         this.bundle = objects.property(Bundle.class);
         this.helpSet = objects.property(HelpSet.class);
         this.classnames = objects.property(Classnames.class);
@@ -193,6 +198,12 @@ public class GenerateManifestFile extends DefaultTask {
     @Optional
     public Property<Dependencies> getDependencies() {
         return dependencies;
+    }
+
+    @Nested
+    @Optional
+    public Property<BundledLibs> getBundledLibs() {
+        return bundledLibs;
     }
 
     @Nested
@@ -287,6 +298,16 @@ public class GenerateManifestFile extends DefaultTask {
                     getProject().getObjects().newInstance(Dependencies.class, getProject()));
         }
         action.execute(dependencies.get());
+    }
+
+    public void bundledLibs(Action<? super BundledLibs> action) {
+        if (!bundledLibs.isPresent()) {
+            bundledLibs.set(
+                    getProject()
+                            .getObjects()
+                            .newInstance(BundledLibs.class, getProject().getObjects()));
+        }
+        action.execute(bundledLibs.get());
     }
 
     public void bundle(Action<? super Bundle> action) {
@@ -395,6 +416,21 @@ public class GenerateManifestFile extends DefaultTask {
                                     }
                                     manifest.dependencies.addOns.add(addOnSer);
                                 });
+            }
+        }
+
+        if (getBundledLibs().isPresent()) {
+            BundledLibs bundledLibs1 = getBundledLibs().get();
+            ConfigurableFileCollection libs = bundledLibs1.getLibs();
+            if (!libs.isEmpty()) {
+                String dirName = bundledLibs1.getDirName().get();
+                manifest.libs =
+                        libs.getFiles().stream()
+                                .filter(File::isFile)
+                                .map(File::getName)
+                                .sorted()
+                                .map(name -> dirName + "/" + name)
+                                .collect(Collectors.toList());
             }
         }
 

@@ -39,6 +39,7 @@ public class ManifestExtension {
     private final RegularFileProperty changesFile;
     private final Property<String> repo;
     private final Property<Dependencies> dependencies;
+    private final Property<BundledLibs> bundledLibs;
     private final Property<Bundle> bundle;
     private final Property<HelpSet> helpSet;
     private final Property<Classnames> classnames;
@@ -69,6 +70,7 @@ public class ManifestExtension {
         this.changesFile = objects.fileProperty();
         this.repo = objects.property(String.class);
         this.dependencies = objects.property(Dependencies.class);
+        this.bundledLibs = objects.property(BundledLibs.class);
         this.bundle = objects.property(Bundle.class);
         this.helpSet = objects.property(HelpSet.class);
         this.classnames = objects.property(Classnames.class);
@@ -120,6 +122,17 @@ public class ManifestExtension {
             dependencies.set(project.getObjects().newInstance(Dependencies.class, project));
         }
         action.execute(dependencies.get());
+    }
+
+    public Property<BundledLibs> getBundledLibs() {
+        return bundledLibs;
+    }
+
+    public void bundledLibs(Action<? super BundledLibs> action) {
+        if (!bundledLibs.isPresent()) {
+            bundledLibs.set(project.getObjects().newInstance(BundledLibs.class, project));
+        }
+        action.execute(bundledLibs.get());
     }
 
     public Property<Bundle> getBundle() {

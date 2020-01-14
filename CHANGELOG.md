@@ -22,6 +22,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    }
    ```
 
+### Removed
+ - Remove features related to the wiki generation, the help will be converted when releasing the
+ add-on to the marketplace. The following tasks and extensions will no longer be available:
+   - Tasks added:
+     - `generateWiki-*`
+     - `copyWiki-*`
+   - Task provided:
+     - `org.zaproxy.gradle.addon.wiki.tasks.GenerateWiki`
+   - Extension:
+     - `wikiGen` (in `zapAddOn`)
+
 ## [0.2.0] - 2019-05-20
 ### Added
 Add (opinionated) tasks and extension properties to help with the release of the add-on.

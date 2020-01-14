@@ -14,14 +14,12 @@ version = "0.3.0-SNAPSHOT"
 
 dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.9")
-    implementation("com.overzealous:remark:1.1.0")
     val flexmarkVersion = "0.42.8"
     implementation("com.vladsch.flexmark:flexmark-java:$flexmarkVersion")
     implementation("com.vladsch.flexmark:flexmark-ext-gfm-strikethrough:$flexmarkVersion")
     implementation("com.vladsch.flexmark:flexmark-ext-gfm-tasklist:$flexmarkVersion")
     implementation("com.vladsch.flexmark:flexmark-ext-tables:$flexmarkVersion")
     implementation("io.github.classgraph:classgraph:4.8.36")
-    implementation("org.apache.commons:commons-lang3:3.9")
     implementation("org.zaproxy:zap-clientapi:1.6.0")
     implementation("org.kohsuke:github-api:1.95")
     // Include annotations used by the above library to avoid compiler warnings.

@@ -45,7 +45,6 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
-import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
@@ -65,8 +64,6 @@ import org.zaproxy.gradle.addon.misc.InstallAddOn;
 import org.zaproxy.gradle.addon.misc.PrepareAddOnNextDevIter;
 import org.zaproxy.gradle.addon.misc.PrepareAddOnRelease;
 import org.zaproxy.gradle.addon.misc.UninstallAddOn;
-import org.zaproxy.gradle.addon.wiki.WikiGenExtension;
-import org.zaproxy.gradle.addon.wiki.tasks.GenerateWiki;
 
 /** The plugin to help build ZAP add-ons. */
 public class AddOnPlugin implements Plugin<Project> {
@@ -80,13 +77,6 @@ public class AddOnPlugin implements Plugin<Project> {
      * <p>Accessible through the {@value #MAIN_EXTENSION_NAME} extension.
      */
     public static final String MANIFEST_EXTENSION_NAME = "manifest";
-
-    /**
-     * The name of the extension to configure the generation of wiki files.
-     *
-     * <p>Accessible through the {@value #MAIN_EXTENSION_NAME} extension.
-     */
-    public static final String WIKI_GEN_EXTENSION_NAME = "wikiGen";
 
     /**
      * The name of the extension to configure the generation of API client files.
@@ -571,110 +561,6 @@ public class AddOnPlugin implements Plugin<Project> {
                                                 t.getDestinationDir().set(dir);
                                             });
                     addOnTask.configure(t -> t.from(jhi));
-                });
-
-        Directory mainWikiDestDir = zapAddOnBuildDir.dir("wiki").get();
-
-        TaskProvider<Jar> jarWikiHelpTask =
-                project.getTasks()
-                        .register(
-                                "jarJavaHelpDataForWiki",
-                                Jar.class,
-                                t -> {
-                                    t.setDescription(
-                                            "Assembles the JAR used for the wiki generation from the JavaHelp data.");
-                                    t.setGroup(LifecycleBasePlugin.BUILD_GROUP);
-
-                                    t.from(
-                                            srcDir,
-                                            project.getConvention()
-                                                    .getPlugin(JavaPluginConvention.class)
-                                                    .getSourceSets()
-                                                    .named(SourceSet.MAIN_SOURCE_SET_NAME)
-                                                    .map(SourceSet::getResources));
-                                    t.getArchiveBaseName().set("javaHelpData");
-                                    t.getDestinationDirectory().set(mainWikiDestDir);
-                                    t.getArchiveVersion().set("");
-                                    t.setPreserveFileTimestamps(false);
-                                    t.setReproducibleFileOrder(true);
-                                });
-
-        WikiGenExtension wikiGenExtension =
-                ((ExtensionAware) extension)
-                        .getExtensions()
-                        .create(WIKI_GEN_EXTENSION_NAME, WikiGenExtension.class, project);
-
-        helpsets.forEach(
-                helpset -> {
-                    File helpDir = helpset.getParentFile();
-                    String name = helpDir.getName();
-
-                    Directory wikiDir = mainWikiDestDir.dir(name);
-                    TaskProvider<GenerateWiki> wikiTask =
-                            project.getTasks()
-                                    .register(
-                                            "generateWiki-" + name,
-                                            GenerateWiki.class,
-                                            t -> {
-                                                t.setDescription(
-                                                        "Generates the wiki files from "
-                                                                + name
-                                                                + " dir.");
-                                                t.setGroup(LifecycleBasePlugin.BUILD_GROUP);
-
-                                                t.getJavaHelpData()
-                                                        .set(
-                                                                jarWikiHelpTask.flatMap(
-                                                                        Jar::getArchiveFile));
-
-                                                t.getContentsDir()
-                                                        .set(
-                                                                srcDirFile
-                                                                        .toPath()
-                                                                        .relativize(
-                                                                                helpDir.toPath()
-                                                                                        .resolve(
-                                                                                                "contents"))
-                                                                        .toString());
-
-                                                t.getToc()
-                                                        .set(
-                                                                srcDirFile
-                                                                        .toPath()
-                                                                        .relativize(
-                                                                                helpDir.toPath()
-                                                                                        .resolve(
-                                                                                                "toc.xml"))
-                                                                        .toString());
-                                                t.getMap()
-                                                        .set(
-                                                                srcDirFile
-                                                                        .toPath()
-                                                                        .relativize(
-                                                                                helpDir.toPath()
-                                                                                        .resolve(
-                                                                                                "map.jhm"))
-                                                                        .toString());
-                                                t.getWikiFilesPrefix()
-                                                        .set(wikiGenExtension.getWikiFilesPrefix());
-
-                                                t.getWikiToc().set(wikiDir.file("_Sidebar.md"));
-                                                t.getOutputDir().set(wikiDir.dir("contents"));
-                                            });
-
-                    project.getTasks()
-                            .register(
-                                    "copyWiki-" + name,
-                                    Copy.class,
-                                    t -> {
-                                        t.setDescription(
-                                                "Copies the wiki files of "
-                                                        + name
-                                                        + " dir to the wiki dir.");
-                                        t.setGroup(LifecycleBasePlugin.BUILD_GROUP);
-                                        t.from(wikiTask.map(GenerateWiki::getOutputDir));
-                                        t.into(wikiGenExtension.getWikiDir());
-                                    });
                 });
     }
 

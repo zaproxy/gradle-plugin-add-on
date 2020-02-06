@@ -104,7 +104,7 @@ public class AddOnPlugin implements Plugin<Project> {
     public static final String COPY_ADD_ON_TASK_NAME = "copyZapAddOn";
 
     static final String COPY_ADD_ON_TASK_DESC =
-            "Copies the add-on to zaproxy project (defaults to \"$rootDir/../zaproxy/src/plugin/\").";
+            "Copies the add-on to zaproxy project (defaults to \"$rootDir/../zaproxy/zap/src/main/dist/plugin/\").";
 
     /**
      * The name of the task that deploys the add-on and its home files to ZAP home dir.

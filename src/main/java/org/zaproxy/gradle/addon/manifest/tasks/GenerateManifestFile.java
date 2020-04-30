@@ -24,6 +24,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.util.DefaultXmlPrettyPrinter;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.MethodInfo;
 import io.github.classgraph.ScanResult;
 import java.io.File;
@@ -35,9 +36,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.InvalidUserDataException;
@@ -98,6 +100,7 @@ public class GenerateManifestFile extends DefaultTask {
     private final Property<String> notFromVersion;
 
     private final ConfigurableFileCollection classpath;
+    private final ConfigurableFileCollection compileClasspath;
 
     private final DirectoryProperty outputDir;
     private final Provider<RegularFile> manifest;
@@ -132,6 +135,7 @@ public class GenerateManifestFile extends DefaultTask {
         this.notBeforeVersion = objects.property(String.class);
         this.notFromVersion = objects.property(String.class);
         this.classpath = getProject().files();
+        this.compileClasspath = getProject().files();
         this.outputDir = objects.directoryProperty();
         this.manifest = outputDir.map(dir -> dir.file(Constants.ADD_ON_MANIFEST_FILE_NAME));
     }
@@ -290,6 +294,13 @@ public class GenerateManifestFile extends DefaultTask {
     @PathSensitive(PathSensitivity.RELATIVE)
     public ConfigurableFileCollection getClasspath() {
         return classpath;
+    }
+
+    @InputFiles
+    @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public ConfigurableFileCollection getCompileClasspath() {
+        return compileClasspath;
     }
 
     public void dependencies(Action<? super Dependencies> action) {
@@ -463,24 +474,28 @@ public class GenerateManifestFile extends DefaultTask {
         final List<String> ascanrulesClasspath = new ArrayList<>();
         final List<String> pscanrulesClasspath = new ArrayList<>();
         if (!classpath.isEmpty()) {
+            Set<File> targetClasses = new HashSet<>(classpath.getFiles());
+            Set<File> allClasses = new HashSet<>(targetClasses);
+            allClasses.addAll(compileClasspath.getFiles());
             try (ScanResult scanResult =
-                    new ClassGraph().overrideClasspath(classpath).enableAllInfo().scan()) {
-                addSubclasses(
+                    new ClassGraph().overrideClasspath(allClasses).enableAllInfo().scan()) {
+                ClassInfoList addOnClasses =
+                        scanResult
+                                .getAllStandardClasses()
+                                .filter(ci -> targetClasses.contains(ci.getClasspathElementFile()));
+                addClassesAssignableTo(
                         extensionsClasspath,
-                        scanResult,
-                        "org.parosproxy.paros.extension.Extension",
-                        "org.parosproxy.paros.extension.ExtensionAdaptor");
-                addSubclasses(
+                        addOnClasses,
+                        scanResult.getClassInfo("org.parosproxy.paros.extension.Extension"));
+                addClassesAssignableTo(
                         ascanrulesClasspath,
-                        scanResult,
-                        "org.parosproxy.paros.core.scanner.AbstractPlugin",
-                        "org.parosproxy.paros.core.scanner.AbstractHostPlugin",
-                        "org.parosproxy.paros.core.scanner.AbstractAppPlugin",
-                        "org.parosproxy.paros.core.scanner.AbstractAppParamPlugin");
-                addSubclasses(
+                        addOnClasses,
+                        scanResult.getClassInfo("org.parosproxy.paros.core.scanner.Plugin"));
+                addClassesAssignableTo(
                         pscanrulesClasspath,
-                        scanResult,
-                        "org.zaproxy.zap.extension.pscan.PluginPassiveScanner");
+                        addOnClasses,
+                        scanResult.getClassInfo(
+                                "org.zaproxy.zap.extension.pscan.PluginPassiveScanner"));
             }
         }
 
@@ -596,18 +611,13 @@ public class GenerateManifestFile extends DefaultTask {
         return manifest;
     }
 
-    private void addSubclasses(List<String> list, ScanResult scanResult, String... classnames) {
-        scanResult.getAllStandardClasses()
+    private void addClassesAssignableTo(
+            List<String> list, ClassInfoList addOnClasses, ClassInfo baseClass) {
+        addOnClasses.getAssignableTo(baseClass)
                 .filter(
                         ci ->
                                 ci.isPublic()
                                         && !ci.isAbstract()
-                                        && ci.getSuperclasses().stream()
-                                                .map(ClassInfo::getName)
-                                                .anyMatch(
-                                                        name ->
-                                                                StringUtils.equalsAny(
-                                                                        name, classnames))
                                         && !ci.getDeclaredConstructorInfo()
                                                 .filter(MethodInfo::isConstructor)
                                                 .filter(MethodInfo::isPublic)

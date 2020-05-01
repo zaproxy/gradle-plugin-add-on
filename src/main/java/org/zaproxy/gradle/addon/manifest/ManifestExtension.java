@@ -51,6 +51,7 @@ public class ManifestExtension {
     private final Property<String> notFromVersion;
 
     private final ConfigurableFileCollection classpath;
+    private final ConfigurableFileCollection compileClasspath;
 
     private final DirectoryProperty outputDir;
 
@@ -82,6 +83,7 @@ public class ManifestExtension {
         this.notBeforeVersion = objects.property(String.class);
         this.notFromVersion = objects.property(String.class);
         this.classpath = project.files();
+        this.compileClasspath = project.files();
         this.outputDir = objects.directoryProperty();
     }
 
@@ -207,6 +209,10 @@ public class ManifestExtension {
 
     public ConfigurableFileCollection getClasspath() {
         return classpath;
+    }
+
+    public ConfigurableFileCollection getCompileClasspath() {
+        return compileClasspath;
     }
 
     public DirectoryProperty getOutputDir() {

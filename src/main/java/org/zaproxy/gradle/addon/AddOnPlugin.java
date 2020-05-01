@@ -290,6 +290,11 @@ public class AddOnPlugin implements Plugin<Project> {
                                 .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
                                 .getOutput()
                                 .getClassesDirs());
+        ConfigurationContainer confs = project.getConfigurations();
+        manifestExtension
+                .getCompileClasspath()
+                .from(confs.named(JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME));
+
         manifestExtension.getOutputDir().set(zapAddOnBuildDir);
 
         TaskProvider<GenerateManifestFile> generateTaskProvider =
@@ -327,6 +332,8 @@ public class AddOnPlugin implements Plugin<Project> {
                                     t.getNotFromVersion()
                                             .set(manifestExtension.getNotFromVersion());
                                     t.getClasspath().from(manifestExtension.getClasspath());
+                                    t.getCompileClasspath()
+                                            .from(manifestExtension.getCompileClasspath());
 
                                     t.getOutputDir().set(manifestExtension.getOutputDir());
                                 });

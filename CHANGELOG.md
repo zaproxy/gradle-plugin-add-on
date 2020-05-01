@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
  - Update the copy destination in help information for the copyZapAddOn task.
+ - Correctly search for extensions and scan rules when creating the add-on manifest. If an extension or scan rule
+ didn't extend directly from the core classes it would not have been included in the manifest.
 
 ## [0.3.0] - 2020-01-14
 ### Added

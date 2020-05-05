@@ -64,6 +64,7 @@ import org.zaproxy.gradle.addon.misc.InstallAddOn;
 import org.zaproxy.gradle.addon.misc.PrepareAddOnNextDevIter;
 import org.zaproxy.gradle.addon.misc.PrepareAddOnRelease;
 import org.zaproxy.gradle.addon.misc.UninstallAddOn;
+import org.zaproxy.gradle.addon.misc.UpdateChangelog;
 
 /** The plugin to help build ZAP add-ons. */
 public class AddOnPlugin implements Plugin<Project> {
@@ -182,6 +183,13 @@ public class AddOnPlugin implements Plugin<Project> {
 
     static final String GENERATE_MANIFEST_TASK_DESC =
             "Generates the manifest (ZapAddOn.xml) for the ZAP add-on.";
+
+    /**
+     * The name of the task that updates the changelog.
+     *
+     * @see org.zaproxy.gradle.addon.misc.UpdateChangelog
+     */
+    public static final String UPDATE_CHANGELOG_TASK_NAME = "updateChangelog";
 
     /**
      * The name of the task that generates the API client files for the ZAP add-on.
@@ -670,6 +678,12 @@ public class AddOnPlugin implements Plugin<Project> {
                             t.getCurrentVersion().set(extension.getAddOnVersion());
                             t.getUnreleasedLink().set(extension.getUnreleasedLink());
                         });
+
+        project.getTasks()
+                .register(
+                        UPDATE_CHANGELOG_TASK_NAME,
+                        UpdateChangelog.class,
+                        t -> t.getChangelog().set(extension.getChangelog()));
     }
 
     private static void setUpApiClientGen(Project project, AddOnPluginExtension extension) {

@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+ - Task to update the changelog, named `updateChangelog`.
+
 ### Fixed
  - Update the copy destination in help information for the copyZapAddOn task.
  - Correctly search for extensions and scan rules when creating the add-on manifest. If an extension or scan rule

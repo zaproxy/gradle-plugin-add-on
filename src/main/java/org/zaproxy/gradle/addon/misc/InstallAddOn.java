@@ -19,8 +19,6 @@
  */
 package org.zaproxy.gradle.addon.misc;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.PathSensitive;
@@ -50,11 +48,9 @@ public class InstallAddOn extends ZapApiTask {
     @TaskAction
     public void start() {
         ClientApi client = createClient();
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("file", getAddOn().get().getAsFile().toString());
+        String file = getAddOn().get().getAsFile().toString();
         try {
-            if (!isResponseOk(
-                    client.callApi("autoupdate", "action", "installLocalAddon", parameters))) {
+            if (!isResponseOk(client.autoupdate.installLocalAddon(file))) {
                 throw new AddOnPluginException(
                         "Failed to install the add-on, check ZAP log for more details.");
             }

@@ -48,7 +48,7 @@ public class UninstallAddOn extends ZapApiTask {
         ClientApi client = createClient();
         try {
             String id = getAddOnId().get();
-            if (hasAddOn(client.callApi("autoupdate", "view", "localAddons", null), id)) {
+            if (hasAddOn(client.autoupdate.localAddons(), id)) {
                 client.autoupdate.uninstallAddon(id);
             }
         } catch (ClientApiException e) {

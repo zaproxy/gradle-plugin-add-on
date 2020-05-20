@@ -20,7 +20,7 @@ dependencies {
     implementation("com.vladsch.flexmark:flexmark-ext-gfm-tasklist:$flexmarkVersion")
     implementation("com.vladsch.flexmark:flexmark-ext-tables:$flexmarkVersion")
     implementation("io.github.classgraph:classgraph:4.8.36")
-    implementation("org.zaproxy:zap-clientapi:1.6.0")
+    implementation("org.zaproxy:zap-clientapi:1.8.0")
     implementation("org.kohsuke:github-api:1.95")
     // Include annotations used by the above library to avoid compiler warnings.
     compileOnly("com.google.code.findbugs:findbugs-annotations:3.0.1")

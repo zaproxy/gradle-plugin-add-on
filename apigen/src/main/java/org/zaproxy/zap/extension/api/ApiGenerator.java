@@ -38,6 +38,7 @@ public class ApiGenerator {
 
     private static final String DOTNET_OUTPUT_DIR =
             "zap-api-dotnet/src/OWASPZAPDotNetAPI/OWASPZAPDotNetAPI/Generated";
+    private static final String GO_OUTPUT_DIR = "zap-api-go/zap/";
     private static final String JAVA_OUTPUT_DIR =
             "zap-api-java/subprojects/zap-clientapi/src/main/java/org/zaproxy/clientapi/gen";
     private static final String PHP_OUTPUT_DIR = "zaproxy/php/api/zapv2/src/Zap";
@@ -99,6 +100,7 @@ public class ApiGenerator {
         List<ApiGeneratorWrapper> generators =
                 Arrays.asList(
                         wrapper(DotNetAPIGenerator.class, DOTNET_OUTPUT_DIR),
+                        wrapper(GoAPIGenerator.class, GO_OUTPUT_DIR),
                         wrapper(JavaAPIGenerator.class, JAVA_OUTPUT_DIR),
                         wrapper(NodeJSAPIGenerator.class, NODE_OUTPUT_DIR),
                         wrapper(PhpAPIGenerator.class, PHP_OUTPUT_DIR),

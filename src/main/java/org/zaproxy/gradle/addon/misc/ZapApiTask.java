@@ -19,7 +19,9 @@
  */
 package org.zaproxy.gradle.addon.misc;
 
+import java.util.Locale;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.Project;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
@@ -30,8 +32,30 @@ import org.zaproxy.clientapi.core.ClientApi;
 /** A task that accesses the ZAP API. */
 public class ZapApiTask extends DefaultTask {
 
-    private static final String DEFAULT_ADDRESS = "127.0.0.1";
-    private static final int DEFAULT_PORT = 8080;
+    private enum Default {
+        ADDRESS("127.0.0.1"),
+        PORT("8080"),
+        KEY(null);
+
+        private final String propertyKey;
+        private final String defaultValue;
+
+        Default(String defaultValue) {
+            this.propertyKey = "zap.api." + name().toLowerCase(Locale.ROOT);
+            this.defaultValue = defaultValue;
+        }
+
+        String getValue(Project project) {
+            String value = null;
+            if (project.hasProperty(propertyKey)) {
+                value = (String) project.property(propertyKey);
+            }
+            if (value == null || value.isEmpty()) {
+                value = defaultValue;
+            }
+            return value;
+        }
+    }
 
     private final Property<String> address;
     private final Property<Integer> port;
@@ -39,14 +63,20 @@ public class ZapApiTask extends DefaultTask {
 
     public ZapApiTask() {
         ObjectFactory objects = getProject().getObjects();
-        address = objects.property(String.class).value(DEFAULT_ADDRESS);
-        port = objects.property(Integer.class).value(DEFAULT_PORT);
-        apiKey = objects.property(String.class);
+        address = objects.property(String.class).value(Default.ADDRESS.getValue(getProject()));
+        port = objects.property(Integer.class);
+        optionPort(Default.PORT.getValue(getProject()));
+        apiKey = objects.property(String.class).value(Default.KEY.getValue(getProject()));
     }
 
     @Input
     public Property<String> getAddress() {
         return address;
+    }
+
+    @Option(option = "address", description = "The ZAP address.")
+    public void optionAddress(String address) {
+        this.address.set(address);
     }
 
     @Input
@@ -67,6 +97,11 @@ public class ZapApiTask extends DefaultTask {
     @Optional
     public Property<String> getApiKey() {
         return apiKey;
+    }
+
+    @Option(option = "api-key", description = "The ZAP API key.")
+    public void optionApiKey(String apiKey) {
+        this.apiKey.set(apiKey);
     }
 
     protected ClientApi createClient() {

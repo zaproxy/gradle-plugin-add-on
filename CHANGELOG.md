@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Add Go generator to task `GenerateApiClientFiles`.
+- Allow to configure the default values used in API tasks (e.g. `installZapAddOn`) using the system properties:
+  - `zap.api.address`, for the ZAP address;
+  - `zap.api.port`, for the ZAP port;
+  - `zap.api.key`, for the API key.
+  
+  and specify the values using the command line arguments:
+  - `--address`, for the ZAP address;
+  - `--api-key`, for the API key.
+  
+  (The API tasks already allowed to specify the port using the command line argument `--port`.)
 
 ### Changed
 - Update ZAP API client to version 1.8.0.

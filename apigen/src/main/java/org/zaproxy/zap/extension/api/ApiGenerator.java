@@ -26,27 +26,66 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import org.parosproxy.paros.common.AbstractParam;
 
 public class ApiGenerator {
 
     private static final String CONF_FILE = "apigen.properties";
 
-    private static final String DOTNET_OUTPUT_DIR =
-            "zap-api-dotnet/src/OWASPZAPDotNetAPI/OWASPZAPDotNetAPI/Generated";
-    private static final String GO_OUTPUT_DIR = "zap-api-go/zap/";
-    private static final String JAVA_OUTPUT_DIR =
-            "zap-api-java/subprojects/zap-clientapi/src/main/java/org/zaproxy/clientapi/gen";
-    private static final String PHP_OUTPUT_DIR = "zaproxy/php/api/zapv2/src/Zap";
-    private static final String PYTHON_OUTPUT_DIR = "zap-api-python/src/zapv2/";
-    private static final String NODE_OUTPUT_DIR = "zap-api-nodejs/src/";
-    private static final String RUST_OUTPUT_DIR = "zap-api-rust/src/";
-
     private static Path baseDir;
+
+    private enum Generator {
+        ALL(null, null),
+        DOTNET(
+                DotNetAPIGenerator.class,
+                "zap-api-dotnet/src/OWASPZAPDotNetAPI/OWASPZAPDotNetAPI/Generated"),
+        GO(GoAPIGenerator.class, "zap-api-go/zap/"),
+        JAVA(
+                JavaAPIGenerator.class,
+                "zap-api-java/subprojects/zap-clientapi/src/main/java/org/zaproxy/clientapi/gen"),
+        NODEJS(NodeJSAPIGenerator.class, "zap-api-nodejs/src/"),
+        PHP(PhpAPIGenerator.class, "zaproxy/php/api/zapv2/src/Zap"),
+        PYTHON(PythonAPIGenerator.class, "zap-api-python/src/zapv2/"),
+        RUST(RustAPIGenerator.class, "zap-api-rust/src/");
+
+        private final Class<? extends AbstractAPIGenerator> clazz;
+        private final String outputDir;
+
+        Generator(Class<? extends AbstractAPIGenerator> clazz, String outputDir) {
+            this.clazz = clazz;
+            this.outputDir = outputDir;
+        }
+
+        List<ApiGeneratorWrapper> createApiGenerators() {
+            if (this == ALL) {
+                EnumSet<Generator> generators = EnumSet.allOf(Generator.class);
+                generators.remove(ALL);
+                return generators.stream()
+                        .map(Generator::createWrapper)
+                        .collect(Collectors.toList());
+            }
+
+            return Collections.singletonList(createWrapper());
+        }
+
+        private ApiGeneratorWrapper createWrapper() {
+            return new ApiGeneratorWrapper(clazz, baseDir.resolve(outputDir));
+        }
+
+        static Generator from(String value) {
+            if (value == null || value.isEmpty()) {
+                return ALL;
+            }
+            return valueOf(value.toUpperCase(Locale.ROOT));
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
@@ -79,7 +118,7 @@ public class ApiGenerator {
             api.addApiOptions(classAbstractParam.getDeclaredConstructor().newInstance());
         }
 
-        generate(api);
+        generate(Generator.from(conf.getProperty("language")).createApiGenerators(), api);
     }
 
     private static Path getBaseDir(Properties conf) {
@@ -96,18 +135,7 @@ public class ApiGenerator {
         return dir;
     }
 
-    private static void generate(ApiImplementor api) {
-        List<ApiGeneratorWrapper> generators =
-                Arrays.asList(
-                        wrapper(DotNetAPIGenerator.class, DOTNET_OUTPUT_DIR),
-                        wrapper(GoAPIGenerator.class, GO_OUTPUT_DIR),
-                        wrapper(JavaAPIGenerator.class, JAVA_OUTPUT_DIR),
-                        wrapper(NodeJSAPIGenerator.class, NODE_OUTPUT_DIR),
-                        wrapper(PhpAPIGenerator.class, PHP_OUTPUT_DIR),
-                        wrapper(PythonAPIGenerator.class, PYTHON_OUTPUT_DIR),
-                        wrapper(RustAPIGenerator.class, RUST_OUTPUT_DIR)
-                        // wrapper(WikiAPIGenerator.class, "zaproxy-wiki")
-                        );
+    private static void generate(List<ApiGeneratorWrapper> generators, ApiImplementor api) {
         ResourceBundle bundle =
                 ResourceBundle.getBundle(
                         api.getClass().getPackage().getName() + ".resources.Messages",
@@ -117,11 +145,6 @@ public class ApiGenerator {
                                 ResourceBundle.Control.FORMAT_PROPERTIES));
 
         generators.forEach(generator -> generator.generate(api, bundle));
-    }
-
-    private static ApiGeneratorWrapper wrapper(
-            Class<? extends AbstractAPIGenerator> clazz, String outputDir) {
-        return new ApiGeneratorWrapper(clazz, baseDir.resolve(outputDir));
     }
 
     private static class ApiGeneratorWrapper {

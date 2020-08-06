@@ -25,6 +25,9 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
@@ -43,10 +46,16 @@ import org.gradle.api.tasks.TaskAction;
 /** A task to generate the API client files of an add-on. */
 public class GenerateApiClientFiles extends DefaultTask {
 
+    public static final List<String> LANGUAGES =
+            Collections.unmodifiableList(
+                    Arrays.asList("DotNet", "Go", "Java", "NodeJs", "Php", "Python", "Rust"));
+    public static final String ALL_LANGUAGES = "ALL";
+
     private final Property<String> api;
     private final Property<String> options;
     private final RegularFileProperty messages;
     private final DirectoryProperty baseDir;
+    private final Property<String> language;
     private final ConfigurableFileCollection classpath;
 
     public GenerateApiClientFiles() {
@@ -56,6 +65,7 @@ public class GenerateApiClientFiles extends DefaultTask {
         messages = objects.fileProperty();
         baseDir = objects.directoryProperty();
         baseDir.set(getProject().getRootDir().getParentFile());
+        language = objects.property(String.class).value(ALL_LANGUAGES);
         classpath = getProject().files();
     }
 
@@ -81,6 +91,12 @@ public class GenerateApiClientFiles extends DefaultTask {
     @Optional
     public DirectoryProperty getBaseDir() {
         return baseDir;
+    }
+
+    @Input
+    @Optional
+    public Property<String> getLanguage() {
+        return language;
     }
 
     @Classpath
@@ -118,6 +134,7 @@ public class GenerateApiClientFiles extends DefaultTask {
             conf.setProperty("api", api.get());
             conf.setProperty("options", options.isPresent() ? options.get() : "");
             conf.setProperty("basedir", baseDir.get().getAsFile().getAbsolutePath());
+            conf.setProperty("language", language.getOrElse(ALL_LANGUAGES));
             conf.store(out, null);
         }
 

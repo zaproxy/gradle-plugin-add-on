@@ -199,7 +199,7 @@ public class AddOnPlugin implements Plugin<Project> {
     public static final String GENERATE_API_CLIENT_TASK_NAME = "generateZapApiClientFiles";
 
     static final String GENERATE_API_CLIENT_TASK_DESC =
-            "Generates the API client files for the ZAP add-on.";
+            "Generates (all) the API client files for the ZAP add-on.";
 
     private static final String ZAP_TASK_GROUP_NAME = "ZAP Add-On Misc";
 
@@ -705,15 +705,42 @@ public class AddOnPlugin implements Plugin<Project> {
                 .register(
                         GENERATE_API_CLIENT_TASK_NAME,
                         GenerateApiClientFiles.class,
-                        t -> {
-                            t.setDescription(GENERATE_API_CLIENT_TASK_DESC);
-                            t.setGroup(LifecycleBasePlugin.BUILD_GROUP);
+                        t ->
+                                setupGenerateApiClientFiles(
+                                        t,
+                                        GENERATE_API_CLIENT_TASK_DESC,
+                                        apiClientGenExtension,
+                                        GenerateApiClientFiles.ALL_LANGUAGES));
 
-                            t.getApi().set(apiClientGenExtension.getApi());
-                            t.getOptions().set(apiClientGenExtension.getOptions());
-                            t.getMessages().set(apiClientGenExtension.getMessages());
-                            t.getBaseDir().set(apiClientGenExtension.getBaseDir());
-                            t.getClasspath().setFrom(apiClientGenExtension.getClasspath());
-                        });
+        GenerateApiClientFiles.LANGUAGES.forEach(
+                lang ->
+                        project.getTasks()
+                                .register(
+                                        String.format("generate%sZapApiClientFiles", lang),
+                                        GenerateApiClientFiles.class,
+                                        t ->
+                                                setupGenerateApiClientFiles(
+                                                        t,
+                                                        String.format(
+                                                                "Generates the %s API client files for the ZAP add-on.",
+                                                                lang),
+                                                        apiClientGenExtension,
+                                                        lang)));
+    }
+
+    private static void setupGenerateApiClientFiles(
+            GenerateApiClientFiles task,
+            String description,
+            ApiClientGenExtension extension,
+            String language) {
+        task.setDescription(description);
+        task.setGroup(ZAP_TASK_GROUP_NAME);
+
+        task.getApi().set(extension.getApi());
+        task.getOptions().set(extension.getOptions());
+        task.getMessages().set(extension.getMessages());
+        task.getBaseDir().set(extension.getBaseDir());
+        task.getLanguage().set(language);
+        task.getClasspath().setFrom(extension.getClasspath());
     }
 }

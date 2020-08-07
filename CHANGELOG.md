@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Add Go generator to task `GenerateApiClientFiles`.
+- Add tasks to generate API client files per language:
+  - `DotNet`, `generateDotNetZapApiClientFiles`;
+  - `Go`, `generateGoZapApiClientFiles`;
+  - `Java`, `generateJavaZapApiClientFiles`;
+  - `NodeJS`, `generateNodeJsZapApiClientFiles`;
+  - `PHP`, `generatePhpZapApiClientFiles`;
+  - `Python`, `generatePythonZapApiClientFiles`;
+  - `Rust`, `generateRustZapApiClientFiles`.
 - Allow to configure the default values used in API tasks (e.g. `installZapAddOn`) using the system properties:
   - `zap.api.address`, for the ZAP address;
   - `zap.api.port`, for the ZAP port;

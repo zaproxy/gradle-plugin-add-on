@@ -6,7 +6,7 @@ plugins {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 group = "org.zaproxy.gradle"
@@ -24,7 +24,9 @@ dependencies {
     implementation("org.kohsuke:github-api:1.95")
     // Include annotations used by the above library to avoid compiler warnings.
     compileOnly("com.google.code.findbugs:findbugs-annotations:3.0.1")
-    compileOnly("com.infradna.tool:bridge-method-annotation:1.18")
+    compileOnly("com.infradna.tool:bridge-method-annotation:1.18") {
+        exclude(group = "org.jenkins-ci")
+    }
     implementation("com.github.zafarkhaja:java-semver:0.9.0")
 }
 

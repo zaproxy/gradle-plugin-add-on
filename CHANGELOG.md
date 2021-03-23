@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (The API tasks already allowed to specify the port using the command line argument `--port`.)
 
 ### Changed
-- Update ZAP API client to version 1.8.0.
+- Update ZAP API client to version 1.9.0.
 
 ## [0.4.0] - 2020-05-05
 ### Added

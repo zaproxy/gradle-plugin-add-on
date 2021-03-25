@@ -1,8 +1,8 @@
 plugins {
     `java-gradle-plugin`
-    id("com.gradle.plugin-publish") version "0.11.0"
+    id("com.gradle.plugin-publish") version "0.13.0"
 
-    id("com.diffplug.gradle.spotless") version "3.18.0"
+    id("com.diffplug.spotless") version "5.11.0"
 }
 
 repositories {
@@ -49,10 +49,6 @@ tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs = listOf("-Xlint:all", "-Xlint:-path", "-Xlint:-options", "-Werror")
 }
 
-tasks.validateTaskProperties {
-    enableStricterValidation = true
-}
-
 val pluginName = "add-on"
 gradlePlugin {
     (plugins) {
@@ -79,7 +75,7 @@ pluginBundle {
 spotless {
     java {
         licenseHeaderFile("gradle/spotless/license.java")
-        googleJavaFormat().aosp()
+        googleJavaFormat("1.7").aosp()
     }
 
     kotlinGradle {

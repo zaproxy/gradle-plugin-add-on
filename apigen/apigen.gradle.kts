@@ -1,7 +1,7 @@
 plugins {
     `java-library`
 
-    id("com.diffplug.gradle.spotless")
+    id("com.diffplug.spotless")
 }
 
 repositories {

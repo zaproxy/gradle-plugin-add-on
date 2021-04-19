@@ -39,6 +39,7 @@ import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPlugin;
@@ -388,6 +389,7 @@ public class AddOnPlugin implements Plugin<Project> {
                                     t.getArchiveVersion().set(extension.getAddOnVersion());
                                     t.getArchiveExtension().set(Constants.ADD_ON_FILE_EXTENSION);
                                     t.getDestinationDirectory().set(zapAddOnBuildDir.dir("bin"));
+                                    t.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE);
 
                                     t.getOutputs()
                                             .upToDateWhen(

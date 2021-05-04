@@ -51,7 +51,7 @@ public class ApiGenerator {
                 JavaAPIGenerator.class,
                 "zap-api-java/subprojects/zap-clientapi/src/main/java/org/zaproxy/clientapi/gen"),
         NODEJS(NodeJSAPIGenerator.class, "zap-api-nodejs/src/"),
-        PHP(PhpAPIGenerator.class, "zaproxy/php/api/zapv2/src/Zap"),
+        PHP(PhpAPIGenerator.class, "zap-api-php/src/Zap"),
         PYTHON(PythonAPIGenerator.class, "zap-api-python/src/zapv2/"),
         RUST(RustAPIGenerator.class, "zap-api-rust/src/");
 

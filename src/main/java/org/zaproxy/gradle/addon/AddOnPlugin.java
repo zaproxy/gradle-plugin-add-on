@@ -53,6 +53,13 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.zaproxy.gradle.addon.apigen.ApiClientGenExtension;
 import org.zaproxy.gradle.addon.apigen.tasks.GenerateApiClientFiles;
 import org.zaproxy.gradle.addon.internal.Constants;
+import org.zaproxy.gradle.addon.internal.GitHubReleaseExtension;
+import org.zaproxy.gradle.addon.internal.model.AddOnRelease;
+import org.zaproxy.gradle.addon.internal.tasks.CreatePullRequest;
+import org.zaproxy.gradle.addon.internal.tasks.CreateTagAndGitHubRelease;
+import org.zaproxy.gradle.addon.internal.tasks.HandleRelease;
+import org.zaproxy.gradle.addon.internal.tasks.PrepareNextDevIter;
+import org.zaproxy.gradle.addon.internal.tasks.PrepareRelease;
 import org.zaproxy.gradle.addon.jh.tasks.JavaHelpIndexer;
 import org.zaproxy.gradle.addon.manifest.BundledLibs;
 import org.zaproxy.gradle.addon.manifest.ManifestExtension;
@@ -79,6 +86,13 @@ public class AddOnPlugin implements Plugin<Project> {
      * <p>Accessible through the {@value #MAIN_EXTENSION_NAME} extension.
      */
     public static final String MANIFEST_EXTENSION_NAME = "manifest";
+
+    /**
+     * The name of the extension to configure the GitHub release tasks.
+     *
+     * <p>Accessible through the {@value #GITHUB_RELEASE_EXTENSION_NAME} extension.
+     */
+    static final String GITHUB_RELEASE_EXTENSION_NAME = "gitHubRelease";
 
     /**
      * The name of the extension to configure the generation of API client files.
@@ -210,6 +224,29 @@ public class AddOnPlugin implements Plugin<Project> {
 
     private static final String MAIN_OUTPUT_DIR = "zapAddOn";
 
+    /**
+     * The name of the task that prepares the release.
+     *
+     * @see org.zaproxy.gradle.addon.internal.tasks.PrepareRelease
+     */
+    static final String PREPARE_RELEASE_TASK_NAME = "prepareRelease";
+
+    /** The name of the task that creates the pull request for release. */
+    static final String CREATE_PULL_REQUEST_RELEASE_TASK_NAME = "createPullRequestRelease";
+
+    /** The name of the task that creates the release. */
+    static final String CREATE_RELEASE_TASK_NAME = "createRelease";
+
+    /** The name of the task that handles the release. */
+    static final String HANDLE_RELEASE_TASK_NAME = "handleRelease";
+
+    /** The name of the task that prepares the next development iteration. */
+    static final String PREPARE_NEXT_DEV_ITER_TASK_NAME = "prepareNextDevIter";
+
+    /** The name of the task that creates the pull request for the next development iteration. */
+    static final String CREATE_PULL_REQUEST_NEXT_DEV_ITER_TASK_NAME =
+            "createPullRequestNextDevIter";
+
     @Override
     public void apply(Project project) {
         project.getPlugins()
@@ -280,6 +317,7 @@ public class AddOnPlugin implements Plugin<Project> {
                             setUpJavaHelp(project, extension, zapAddOnBuildDir);
                             setUpMiscTasks(project, extension, zapAddOnBuildDir);
                             setUpApiClientGen(project, extension);
+                            setUpGitHubRelease(project, extension);
                         });
     }
 
@@ -744,5 +782,115 @@ public class AddOnPlugin implements Plugin<Project> {
         task.getBaseDir().set(extension.getBaseDir());
         task.getLanguage().set(language);
         task.getClasspath().setFrom(extension.getClasspath());
+    }
+
+    private static void setUpGitHubRelease(Project project, AddOnPluginExtension extension) {
+        GitHubReleaseExtension gitHubReleaseExtension =
+                ((ExtensionAware) extension)
+                        .getExtensions()
+                        .create(
+                                GITHUB_RELEASE_EXTENSION_NAME,
+                                GitHubReleaseExtension.class,
+                                project);
+
+        TaskProvider<PrepareRelease> prepareRelease =
+                project.getTasks().register(PREPARE_RELEASE_TASK_NAME, PrepareRelease.class);
+
+        project.getTasks()
+                .register(
+                        CREATE_PULL_REQUEST_RELEASE_TASK_NAME,
+                        CreatePullRequest.class,
+                        t -> {
+                            t.getUser().set(gitHubReleaseExtension.getUser());
+                            t.getRepo().set(gitHubReleaseExtension.getRepo());
+                            t.getBranchName().set("release");
+
+                            t.getCommitSummary()
+                                    .set(
+                                            extension
+                                                    .getAddOnVersion()
+                                                    .map(v -> "Release version " + v));
+                            t.getCommitDescription()
+                                    .set("Update changelog with release date and link to tag.");
+
+                            t.dependsOn(prepareRelease);
+                        });
+
+        TaskProvider<CreateTagAndGitHubRelease> createRelease =
+                project.getTasks()
+                        .register(
+                                CREATE_RELEASE_TASK_NAME,
+                                CreateTagAndGitHubRelease.class,
+                                t -> {
+                                    t.getUser().set(gitHubReleaseExtension.getUser());
+                                    t.getRepo().set(gitHubReleaseExtension.getRepo());
+
+                                    Provider<String> tagProvider =
+                                            extension.getAddOnVersion().map(v -> "v" + v);
+                                    t.getTag().set(tagProvider);
+                                    t.getTagMessage()
+                                            .set(
+                                                    extension
+                                                            .getAddOnVersion()
+                                                            .map(v -> "Version " + v));
+
+                                    t.getTitle().set(tagProvider);
+                                    t.getBodyFile()
+                                            .set(
+                                                    project.getTasks()
+                                                            .named(
+                                                                    EXTRACT_LATEST_CHANGES_TASK_NAME,
+                                                                    ExtractLatestChangesFromChangelog
+                                                                            .class)
+                                                            .flatMap(
+                                                                    ExtractLatestChangesFromChangelog
+                                                                            ::getLatestChanges));
+
+                                    TaskProvider<Jar> jarZapAddOn =
+                                            project.getTasks()
+                                                    .named(JAR_ZAP_ADD_ON_TASK_NAME, Jar.class);
+                                    Provider<RegularFile> jarFile =
+                                            jarZapAddOn.flatMap(Jar::getArchiveFile);
+                                    t.assets(
+                                            c ->
+                                                    c.register(
+                                                            "add-on",
+                                                            asset -> asset.getFile().set(jarFile)));
+                                });
+
+        TaskProvider<HandleRelease> handleRelease =
+                project.getTasks()
+                        .register(
+                                HANDLE_RELEASE_TASK_NAME,
+                                HandleRelease.class,
+                                t -> {
+                                    t.getUser().set(gitHubReleaseExtension.getUser());
+                                    t.getRepo().set(gitHubReleaseExtension.getMarketplaceRepo());
+                                    t.getAddOns().add(AddOnRelease.from(project));
+
+                                    t.mustRunAfter(createRelease);
+                                });
+
+        TaskProvider<PrepareNextDevIter> prepareNextDevIter =
+                project.getTasks()
+                        .register(
+                                PREPARE_NEXT_DEV_ITER_TASK_NAME,
+                                PrepareNextDevIter.class,
+                                t -> t.mustRunAfter(handleRelease));
+
+        project.getTasks()
+                .register(
+                        CREATE_PULL_REQUEST_NEXT_DEV_ITER_TASK_NAME,
+                        CreatePullRequest.class,
+                        t -> {
+                            t.getUser().set(gitHubReleaseExtension.getUser());
+                            t.getRepo().set(gitHubReleaseExtension.getRepo());
+                            t.getBranchName().set("bump-version");
+
+                            t.getCommitSummary().set("Prepare next dev iteration");
+                            t.getCommitDescription().set("Update version and changelog.");
+
+                            t.dependsOn(prepareNextDevIter);
+                        });
     }
 }

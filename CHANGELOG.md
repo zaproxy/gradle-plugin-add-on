@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Internal tasks and an extension to help with release of add-ons in GitHub.
+
 ### Changed
 - Changed the path for the `generatePhpZapApiClientFiles` task to add generated files to `zap-api-php/src/Zap`.
 

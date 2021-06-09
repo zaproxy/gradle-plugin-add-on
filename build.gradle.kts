@@ -1,5 +1,6 @@
 plugins {
     `java-gradle-plugin`
+    `kotlin-dsl`
     id("com.gradle.plugin-publish") version "0.14.0"
 
     id("com.diffplug.spotless") version "5.12.1"
@@ -13,6 +14,7 @@ group = "org.zaproxy.gradle"
 version = "0.6.0-SNAPSHOT"
 
 dependencies {
+    implementation("commons-codec:commons-codec:1.15")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.9")
     val flexmarkVersion = "0.42.8"
     implementation("com.vladsch.flexmark:flexmark-java:$flexmarkVersion")
@@ -20,6 +22,9 @@ dependencies {
     implementation("com.vladsch.flexmark:flexmark-ext-gfm-tasklist:$flexmarkVersion")
     implementation("com.vladsch.flexmark:flexmark-ext-tables:$flexmarkVersion")
     implementation("io.github.classgraph:classgraph:4.8.36")
+    val jgitVersion = "5.6.0.201912101111-r"
+    implementation("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
+    implementation("org.eclipse.jgit:org.eclipse.jgit.archive:$jgitVersion")
     implementation("org.zaproxy:zap-clientapi:1.9.0")
     implementation("org.kohsuke:github-api:1.95")
     // Include annotations used by the above library to avoid compiler warnings.
@@ -76,6 +81,10 @@ spotless {
     java {
         licenseHeaderFile("gradle/spotless/license.java")
         googleJavaFormat("1.7").aosp()
+    }
+
+    kotlin {
+        ktlint()
     }
 
     kotlinGradle {

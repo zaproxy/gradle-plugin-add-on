@@ -28,5 +28,7 @@ public final class Constants {
 
     public static final String HELPSET_FILE_EXTENSION = ".hs";
 
+    public static final String HELPSET_LOCALE_PATTERN = "[^_]+_([^.]+)" + HELPSET_FILE_EXTENSION;
+
     private Constants() {}
 }

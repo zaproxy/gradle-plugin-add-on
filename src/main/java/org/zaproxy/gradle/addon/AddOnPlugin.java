@@ -40,6 +40,7 @@ import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.DuplicatesStrategy;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPlugin;
@@ -55,11 +56,13 @@ import org.zaproxy.gradle.addon.apigen.tasks.GenerateApiClientFiles;
 import org.zaproxy.gradle.addon.internal.Constants;
 import org.zaproxy.gradle.addon.internal.GitHubReleaseExtension;
 import org.zaproxy.gradle.addon.internal.model.AddOnRelease;
+import org.zaproxy.gradle.addon.internal.tasks.CopyCommonHelpData;
 import org.zaproxy.gradle.addon.internal.tasks.CreatePullRequest;
 import org.zaproxy.gradle.addon.internal.tasks.CreateTagAndGitHubRelease;
 import org.zaproxy.gradle.addon.internal.tasks.HandleRelease;
 import org.zaproxy.gradle.addon.internal.tasks.PrepareNextDevIter;
 import org.zaproxy.gradle.addon.internal.tasks.PrepareRelease;
+import org.zaproxy.gradle.addon.internal.tasks.UpdateHelpSetXmlLangAttr;
 import org.zaproxy.gradle.addon.jh.tasks.JavaHelpIndexer;
 import org.zaproxy.gradle.addon.manifest.BundledLibs;
 import org.zaproxy.gradle.addon.manifest.ManifestExtension;
@@ -581,10 +584,10 @@ public class AddOnPlugin implements Plugin<Project> {
 
         Directory mainJhiDestDir = zapAddOnBuildDir.dir("jhindexes").get();
 
-        Set<File> helpsets =
+        FileCollection helpsetFileCollection =
                 project.fileTree(srcDir)
-                        .filter(e -> e.getName().endsWith(Constants.HELPSET_FILE_EXTENSION))
-                        .getFiles();
+                        .filter(e -> e.getName().endsWith(Constants.HELPSET_FILE_EXTENSION));
+        Set<File> helpsets = helpsetFileCollection.getFiles();
         helpsets.forEach(
                 helpset -> {
                     String name = helpset.getParentFile().getName();
@@ -617,6 +620,25 @@ public class AddOnPlugin implements Plugin<Project> {
                                             });
                     addOnTask.configure(t -> t.from(jhi));
                 });
+
+        TaskProvider<UpdateHelpSetXmlLangAttr> updateHelpSetXmlLangAttr =
+                project.getTasks()
+                        .register(
+                                "updateHelpSetXmlLangAttr",
+                                UpdateHelpSetXmlLangAttr.class,
+                                t -> t.getHelpSets().from(helpsetFileCollection));
+
+        TaskProvider<CopyCommonHelpData> copyCommonHelpData =
+                project.getTasks()
+                        .register(
+                                "copyCommonHelpData",
+                                CopyCommonHelpData.class,
+                                t -> t.getHelpSets().from(helpsetFileCollection));
+
+        project.getTasks()
+                .register(
+                        "postProcessLocalizedHelpPages",
+                        t -> t.dependsOn(updateHelpSetXmlLangAttr, copyCommonHelpData));
     }
 
     private static void setUpMiscTasks(

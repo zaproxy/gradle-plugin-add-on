@@ -160,7 +160,7 @@ public class JavaHelpIndexer extends SourceTask {
                                 spec -> {
                                     spec.setClasspath(classpath)
                                             .setWorkingDir(wd.getAbsolutePath());
-                                    spec.setMain(INDEXER_CLASSNAME).args(args);
+                                    spec.args(args).getMainClass().set(INDEXER_CLASSNAME);
                                     spec.setStandardOutput(System.out).setErrorOutput(System.err);
                                 });
 

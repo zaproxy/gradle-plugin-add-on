@@ -44,7 +44,7 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.plugins.JavaPluginConvention;
+import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
@@ -334,8 +334,8 @@ public class AddOnPlugin implements Plugin<Project> {
         manifestExtension
                 .getClasspath()
                 .from(
-                        project.getConvention()
-                                .getPlugin(JavaPluginConvention.class)
+                        project.getExtensions()
+                                .getByType(JavaPluginExtension.class)
                                 .getSourceSets()
                                 .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
                                 .getOutput()
@@ -401,9 +401,9 @@ public class AddOnPlugin implements Plugin<Project> {
                 .getFiles()
                 .from(srcDir);
 
-        JavaPluginConvention javaConvention =
-                project.getConvention().getPlugin(JavaPluginConvention.class);
-        javaConvention
+        JavaPluginExtension javaExtension =
+                project.getExtensions().getByType(JavaPluginExtension.class);
+        javaExtension
                 .getSourceSets()
                 .named(
                         SourceSet.MAIN_SOURCE_SET_NAME,

@@ -143,7 +143,7 @@ public class GenerateApiClientFiles extends DefaultTask {
                         spec -> {
                             spec.setClasspath(getProject().files(classpath, apiGenJar.toFile()));
                             spec.setWorkingDir(wd.toFile());
-                            spec.setMain("org.zaproxy.zap.extension.api.ApiGenerator");
+                            spec.getMainClass().set("org.zaproxy.zap.extension.api.ApiGenerator");
                         });
     }
 }

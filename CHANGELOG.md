@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
-- Recomended minimum Gradle version is now 7.2.
+- Recommended minimum Gradle version is now 7.3.3.
 
 ## [0.7.0] - 2021-07-26
 ### Added

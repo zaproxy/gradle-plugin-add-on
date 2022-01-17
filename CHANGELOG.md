@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.0] - 2022-01-17
 ### Changed
 - Recommended minimum Gradle version is now 7.3.3.
 
@@ -44,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (The API tasks already allowed to specify the port using the command line argument `--port`.)
 
 ### Changed
-- Recomended minimum Gradle version is now 7.0.
+- Recommended minimum Gradle version is now 7.0.
 - The `jarZapAddOn` task will no longer allow duplicated entries (i.e. uses `DuplicatesStrategy.EXCLUDE`).
 - Update ZAP API client to version 1.9.0.
 
@@ -206,7 +206,7 @@ Provided by the plugin:
  with a `ZapVersions.xml` from an add-on.
 
 
-[Unreleased]: https://github.com/zaproxy/gradle-plugin-add-on/compare/v0.7.0...HEAD
+[0.8.0]: https://github.com/zaproxy/gradle-plugin-add-on/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/zaproxy/gradle-plugin-add-on/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/zaproxy/gradle-plugin-add-on/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/zaproxy/gradle-plugin-add-on/compare/v0.4.0...v0.5.0

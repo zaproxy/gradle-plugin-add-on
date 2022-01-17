@@ -11,7 +11,7 @@ repositories {
 }
 
 group = "org.zaproxy.gradle"
-version = "0.8.0"
+version = "0.9.0-SNAPSHOT"
 
 dependencies {
     implementation("commons-codec:commons-codec:1.15")

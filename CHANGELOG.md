@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Recommended minimum Gradle version is now 7.5.1.
 
+### Fixed
+- Ensure task `prepareNextDevIter` runs after both `createRelease` and `handleRelease`, not just the latter.
+
 ## [0.8.0] - 2022-01-17
 ### Changed
 - Recommended minimum Gradle version is now 7.3.3.

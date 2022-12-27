@@ -898,7 +898,10 @@ public class AddOnPlugin implements Plugin<Project> {
                         .register(
                                 PREPARE_NEXT_DEV_ITER_TASK_NAME,
                                 PrepareNextDevIter.class,
-                                t -> t.mustRunAfter(handleRelease));
+                                t -> {
+                                    t.mustRunAfter(createRelease);
+                                    t.mustRunAfter(handleRelease);
+                                });
 
         project.getTasks()
                 .register(

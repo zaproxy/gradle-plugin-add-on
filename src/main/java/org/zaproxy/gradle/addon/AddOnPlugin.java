@@ -801,7 +801,7 @@ public class AddOnPlugin implements Plugin<Project> {
         task.getApi().set(extension.getApi());
         task.getOptions().set(extension.getOptions());
         task.getMessages().set(extension.getMessages());
-        task.getBaseDir().set(extension.getBaseDir());
+        task.getBaseDir().set(extension.getBaseDir().getAsFile());
         task.getLanguage().set(language);
         task.getClasspath().setFrom(extension.getClasspath());
     }

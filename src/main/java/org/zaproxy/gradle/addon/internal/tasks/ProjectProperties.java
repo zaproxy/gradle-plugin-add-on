@@ -66,6 +66,7 @@ class ProjectProperties {
 
         private static final long serialVersionUID = 1L;
 
+        @SuppressWarnings("serial")
         private Map<Object, Object> properties;
 
         @Override

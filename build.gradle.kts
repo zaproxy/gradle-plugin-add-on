@@ -2,7 +2,7 @@ plugins {
     `kotlin-dsl`
     id("com.gradle.plugin-publish") version "1.0.0"
 
-    id("com.diffplug.spotless") version "6.11.0"
+    id("com.diffplug.spotless") version "6.14.1"
 }
 
 repositories {
@@ -24,7 +24,7 @@ dependencies {
     val jgitVersion = "5.6.0.201912101111-r"
     implementation("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
     implementation("org.eclipse.jgit:org.eclipse.jgit.archive:$jgitVersion")
-    implementation("org.zaproxy:zap-clientapi:1.9.0")
+    implementation("org.zaproxy:zap-clientapi:1.11.0")
     implementation("org.kohsuke:github-api:1.95")
     // Include annotations used by the above library to avoid compiler warnings.
     compileOnly("com.google.code.findbugs:findbugs-annotations:3.0.1")

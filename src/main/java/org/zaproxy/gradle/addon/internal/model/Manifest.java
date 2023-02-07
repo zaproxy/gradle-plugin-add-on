@@ -26,14 +26,11 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @JsonRootName(value = "zapaddon")
-public class Manifest implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Manifest {
 
     @JsonProperty public String name;
 

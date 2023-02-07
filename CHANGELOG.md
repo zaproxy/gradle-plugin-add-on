@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
-- Recommended minimum Gradle version is now 7.5.1.
+- Recommended minimum Gradle version is now 7.6.
+- The minimum Java version is 11.
+- Update ZAP API client to version 1.11.0.
+- Maintenance changes.
 
 ### Fixed
 - Ensure task `prepareNextDevIter` runs after both `createRelease` and `handleRelease`, not just the latter.

@@ -23,12 +23,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import java.io.Serializable;
 import java.util.List;
 
-public class DependenciesExt implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class DependenciesExt {
 
     @JacksonXmlElementWrapper(localName = "addons")
     @JacksonXmlProperty(localName = "addon")

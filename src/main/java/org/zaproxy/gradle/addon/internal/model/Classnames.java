@@ -23,12 +23,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import java.io.Serializable;
 import java.util.List;
 
-public class Classnames implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Classnames {
 
     @JsonProperty
     @JsonInclude(value = Include.NON_EMPTY)

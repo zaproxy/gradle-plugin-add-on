@@ -23,11 +23,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import java.io.Serializable;
 
-public class Extension implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Extension {
 
     @JacksonXmlProperty(localName = "v", isAttribute = true)
     @JsonInclude(value = Include.NON_EMPTY)

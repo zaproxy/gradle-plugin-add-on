@@ -19,6 +19,7 @@
  */
 package org.zaproxy.gradle.addon.apigen.tasks;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,7 +32,6 @@ import java.util.List;
 import java.util.Properties;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
@@ -54,7 +54,7 @@ public class GenerateApiClientFiles extends DefaultTask {
     private final Property<String> api;
     private final Property<String> options;
     private final RegularFileProperty messages;
-    private final DirectoryProperty baseDir;
+    private final Property<File> baseDir;
     private final Property<String> language;
     private final ConfigurableFileCollection classpath;
 
@@ -63,7 +63,7 @@ public class GenerateApiClientFiles extends DefaultTask {
         api = objects.property(String.class);
         options = objects.property(String.class);
         messages = objects.fileProperty();
-        baseDir = objects.directoryProperty();
+        baseDir = objects.property(File.class);
         baseDir.set(getProject().getRootDir().getParentFile());
         language = objects.property(String.class).value(ALL_LANGUAGES);
         classpath = getProject().files();
@@ -89,7 +89,7 @@ public class GenerateApiClientFiles extends DefaultTask {
 
     @Input
     @Optional
-    public DirectoryProperty getBaseDir() {
+    public Property<File> getBaseDir() {
         return baseDir;
     }
 
@@ -133,7 +133,7 @@ public class GenerateApiClientFiles extends DefaultTask {
             Properties conf = new Properties();
             conf.setProperty("api", api.get());
             conf.setProperty("options", options.isPresent() ? options.get() : "");
-            conf.setProperty("basedir", baseDir.get().getAsFile().getAbsolutePath());
+            conf.setProperty("basedir", baseDir.get().getAbsolutePath());
             conf.setProperty("language", language.getOrElse(ALL_LANGUAGES));
             conf.store(out, null);
         }

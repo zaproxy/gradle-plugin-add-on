@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.commons.lang3.SystemUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
@@ -55,14 +54,14 @@ public class DeployAddOn extends DefaultTask {
 
     private static String devHomeDir;
 
-    private final DirectoryProperty homeDir;
+    private final Property<File> homeDir;
     private final RegularFileProperty addOn;
     private final ConfigurableFileCollection files;
     private final Property<Boolean> deleteStale;
 
     public DeployAddOn() {
         ObjectFactory objects = getProject().getObjects();
-        homeDir = objects.directoryProperty();
+        homeDir = objects.property(File.class);
         homeDir.set(getDefaultHomeDir());
         addOn = objects.fileProperty();
         files = getProject().files();
@@ -75,7 +74,7 @@ public class DeployAddOn extends DefaultTask {
     }
 
     @Input
-    public DirectoryProperty getHomeDir() {
+    public Property<File> getHomeDir() {
         return homeDir;
     }
 
@@ -114,7 +113,7 @@ public class DeployAddOn extends DefaultTask {
                             fileDetails -> {
                                 filesToDelete.add(
                                         new File(
-                                                homeDir.get().getAsFile(),
+                                                homeDir.get(),
                                                 fileDetails.getRelativePath().toString()));
                             });
             getProject().delete(filesToDelete);

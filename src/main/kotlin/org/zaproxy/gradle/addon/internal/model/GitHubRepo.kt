@@ -6,7 +6,7 @@ data class GitHubRepo(val owner: String, val name: String, val dir: File? = null
     constructor(ownerAndName: String?, dir: File?) : this(
         split(ownerAndName, 0),
         split(ownerAndName, 1),
-        dir
+        dir,
     )
 
     override fun toString() = "$owner/$name"

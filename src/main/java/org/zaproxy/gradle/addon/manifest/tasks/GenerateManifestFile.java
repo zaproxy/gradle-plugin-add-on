@@ -559,6 +559,27 @@ public class GenerateManifestFile extends DefaultTask {
                                                 });
                                 extSer.version = "1";
                             }
+                            if (!dep.getExtensions().isEmpty()) {
+                                if (extSer.dependencies == null) {
+                                    extSer.dependencies =
+                                            new org.zaproxy.gradle.addon.internal.model
+                                                    .DependenciesExt();
+                                    extSer.version = "1";
+                                }
+                                extSer.dependencies.extensions = new ArrayList<>();
+                                dep.getExtensions()
+                                        .forEach(
+                                                extension -> {
+                                                    org.zaproxy.gradle.addon.internal.model
+                                                                    .ExtensionNoDeps
+                                                            depExtSer =
+                                                                    new org.zaproxy.gradle.addon
+                                                                            .internal.model
+                                                                            .ExtensionNoDeps();
+                                                    depExtSer.extension = extension.getClassname();
+                                                    extSer.dependencies.extensions.add(depExtSer);
+                                                });
+                            }
                         }
                         manifest.extensions.add(extSer);
                     });

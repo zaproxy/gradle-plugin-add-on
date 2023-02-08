@@ -31,4 +31,9 @@ public class DependenciesExt {
     @JacksonXmlProperty(localName = "addon")
     @JsonInclude(value = Include.NON_EMPTY)
     public List<AddOn> addOns;
+
+    @JacksonXmlElementWrapper(localName = "extensions")
+    @JacksonXmlProperty(localName = "extension")
+    @JsonInclude(value = Include.NON_EMPTY)
+    public List<ExtensionNoDeps> extensions;
 }

@@ -110,10 +110,14 @@ public class Extension implements Named {
     public static class Dependencies {
 
         private final NamedDomainObjectContainer<AddOn> addOns;
+        private final NamedDomainObjectContainer<Extension> extensions;
 
         @Inject
         public Dependencies(Project project) {
             this.addOns = project.container(AddOn.class, id -> new AddOn(id, project.getObjects()));
+            this.extensions =
+                    project.container(
+                            Extension.class, classname -> new Extension(classname, project));
         }
 
         @Nested
@@ -121,13 +125,27 @@ public class Extension implements Named {
             return getAddOns();
         }
 
+        @Nested
+        public Iterable<Extension> getExtensionsIterable() {
+            return getExtensions();
+        }
+
         @Internal
         public NamedDomainObjectContainer<AddOn> getAddOns() {
             return addOns;
         }
 
+        @Internal
+        public NamedDomainObjectContainer<Extension> getExtensions() {
+            return extensions;
+        }
+
         public void addOns(Action<? super NamedDomainObjectContainer<AddOn>> action) {
             action.execute(addOns);
+        }
+
+        public void extensions(Action<? super NamedDomainObjectContainer<Extension>> action) {
+            action.execute(extensions);
         }
     }
 }

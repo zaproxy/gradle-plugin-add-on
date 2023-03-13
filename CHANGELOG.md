@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Recommended minimum Gradle version is now 7.6.
 - The minimum Java version is 11.
 - Update ZAP API client to version 1.11.0.
+- Allow extensions to depend on other extensions.
 - Maintenance changes.
 
 ### Fixed

@@ -1,6 +1,6 @@
 plugins {
     `kotlin-dsl`
-    id("com.gradle.plugin-publish") version "1.0.0"
+    id("com.gradle.plugin-publish") version "1.1.0"
 
     id("com.diffplug.spotless") version "6.14.1"
 }
@@ -59,6 +59,8 @@ gradlePlugin {
             id = "org.zaproxy.add-on"
             implementationClass = "org.zaproxy.gradle.addon.AddOnPlugin"
             displayName = "Plugin to build ZAP add-ons"
+            description = "A Gradle plugin to (help) build ZAP add-ons."
+            tags.set(listOf("zap", "zaproxy"))
         }
     }
 }
@@ -66,8 +68,6 @@ gradlePlugin {
 pluginBundle {
     website = "https://github.com/zaproxy/gradle-plugin-add-on"
     vcsUrl = "https://github.com/zaproxy/gradle-plugin-add-on.git"
-    description = "A Gradle plugin to (help) build ZAP add-ons."
-    tags = listOf("zap", "zaproxy")
 }
 
 spotless {

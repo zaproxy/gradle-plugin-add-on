@@ -54,6 +54,8 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 gradlePlugin {
+    website.set("https://github.com/zaproxy/gradle-plugin-add-on")
+    vcsUrl.set("https://github.com/zaproxy/gradle-plugin-add-on.git")
     plugins {
         create("add-on") {
             id = "org.zaproxy.add-on"
@@ -63,11 +65,6 @@ gradlePlugin {
             tags.set(listOf("zap", "zaproxy"))
         }
     }
-}
-
-pluginBundle {
-    website = "https://github.com/zaproxy/gradle-plugin-add-on"
-    vcsUrl = "https://github.com/zaproxy/gradle-plugin-add-on.git"
 }
 
 spotless {

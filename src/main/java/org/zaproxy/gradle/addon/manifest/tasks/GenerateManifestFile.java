@@ -634,7 +634,8 @@ public class GenerateManifestFile extends DefaultTask {
 
     private void addClassesAssignableTo(
             List<String> list, ClassInfoList addOnClasses, ClassInfo baseClass) {
-        addOnClasses.getAssignableTo(baseClass)
+        addOnClasses
+                .getAssignableTo(baseClass)
                 .filter(
                         ci ->
                                 ci.isPublic()

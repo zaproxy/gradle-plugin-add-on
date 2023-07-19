@@ -1,8 +1,8 @@
 plugins {
     `kotlin-dsl`
-    id("com.gradle.plugin-publish") version "1.1.0"
+    id("com.gradle.plugin-publish") version "1.2.0"
 
-    id("com.diffplug.spotless") version "6.14.1"
+    id("com.diffplug.spotless") version "6.20.0"
 }
 
 repositories {
@@ -24,7 +24,7 @@ dependencies {
     val jgitVersion = "5.6.0.201912101111-r"
     implementation("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
     implementation("org.eclipse.jgit:org.eclipse.jgit.archive:$jgitVersion")
-    implementation("org.zaproxy:zap-clientapi:1.11.0")
+    implementation("org.zaproxy:zap-clientapi:1.12.0")
     implementation("org.kohsuke:github-api:1.95")
     // Include annotations used by the above library to avoid compiler warnings.
     compileOnly("com.google.code.findbugs:findbugs-annotations:3.0.1")
@@ -44,8 +44,12 @@ tasks.jar {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+kotlin {
+    jvmToolchain(11)
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -70,7 +74,7 @@ gradlePlugin {
 spotless {
     java {
         licenseHeaderFile("gradle/spotless/license.java")
-        googleJavaFormat("1.7").aosp()
+        googleJavaFormat("1.17.0").aosp()
     }
 
     kotlin {

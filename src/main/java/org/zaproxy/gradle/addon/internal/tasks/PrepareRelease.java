@@ -62,7 +62,7 @@ public abstract class PrepareRelease extends PrepareAddOnRelease {
 
         ProjectProperties properties =
                 new ProjectProperties(getPropertiesFile().get().getAsFile().toPath());
-        properties.setProperty(RELEASE_PROPERTY, "true");
+        properties.setProperty(getReleaseProperty().get(), "true");
         properties.store();
     }
 }

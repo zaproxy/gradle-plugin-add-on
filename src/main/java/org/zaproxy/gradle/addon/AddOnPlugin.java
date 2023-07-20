@@ -526,8 +526,10 @@ public class AddOnPlugin implements Plugin<Project> {
                                                                                                 .getLibs()
                                                                                         : project
                                                                                                 .files();
-                                                                return runtimeClasspath.get()
-                                                                        .getFiles().stream()
+                                                                return runtimeClasspath
+                                                                        .get()
+                                                                        .getFiles()
+                                                                        .stream()
                                                                         .filter(
                                                                                 e ->
                                                                                         !bundledLibs

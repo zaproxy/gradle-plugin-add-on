@@ -67,9 +67,10 @@ public abstract class PrepareNextDevIter extends UpdateChangelogNextDevIter {
 
         ProjectProperties properties =
                 new ProjectProperties(getPropertiesFile().get().getAsFile().toPath());
+        String versionProperty = getVersionProperty().get();
         properties.setProperty(
-                VERSION_PROPERTY, bumpVersion(properties.getProperty(VERSION_PROPERTY)));
-        properties.setProperty(RELEASE_PROPERTY, "false");
+                versionProperty, bumpVersion(properties.getProperty(versionProperty)));
+        properties.setProperty(getReleaseProperty().get(), "false");
         properties.store();
     }
 

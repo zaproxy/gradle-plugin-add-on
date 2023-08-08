@@ -151,7 +151,7 @@ public class DeployAddOn extends DefaultTask {
             } else if (SystemUtils.IS_OS_MAC) {
                 devHomeDir += "/Library/Application Support/ZAP_D";
             } else {
-                devHomeDir += "\\OWASP ZAP_D";
+                devHomeDir += "\\ZAP_D";
             }
         }
         return devHomeDir;

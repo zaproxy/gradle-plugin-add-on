@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Recommended minimum Gradle version is now 8.2.
 - Update ZAP API client to version 1.12.0.
+- The default ZAP home dir in Windows was changed to `ZAP_D`, to match the change done in ZAP itself.
 
 ### Fixed
 - Correct the tasks `PrepareNextDevIter` and `PrepareRelease` to use their properties, for the `version` and `release`.

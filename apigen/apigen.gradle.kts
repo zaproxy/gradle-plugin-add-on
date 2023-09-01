@@ -11,7 +11,7 @@ repositories {
 description = "The utility to help generate ZAP API client files for an add-on."
 
 dependencies {
-    compileOnly("org.zaproxy:zap:2.12.0")
+    compileOnly("org.zaproxy:zap:2.13.0")
 }
 
 tasks.jar.configure {

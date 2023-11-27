@@ -14,5 +14,5 @@ fun setUpProject(parentDir: File, project: ProjectDescriptor) {
     if (!project.buildFile.isFile) {
         throw AssertionError("Project ${project.name} has no build file: ${project.buildFile}")
     }
-    project.children.forEach { project -> setUpProject(project.parent!!.projectDir, project) }
+    project.children.forEach { setUpProject(it.parent!!.projectDir, it) }
 }

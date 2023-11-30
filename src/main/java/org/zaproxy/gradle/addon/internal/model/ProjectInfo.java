@@ -19,7 +19,6 @@
  */
 package org.zaproxy.gradle.addon.internal.model;
 
-import java.io.File;
 import java.nio.file.Path;
 import org.gradle.api.Project;
 import org.gradle.api.file.RegularFileProperty;
@@ -39,7 +38,9 @@ public abstract class ProjectInfo {
 
     public static ProjectInfo from(Project project) {
         ProjectInfo projectInfo = project.getObjects().newInstance(ProjectInfo.class);
-        projectInfo.getOutputFile().set(new File(project.getBuildDir(), FILE_NAME_OUTPUT));
+        projectInfo
+                .getOutputFile()
+                .set(project.getLayout().getBuildDirectory().file(FILE_NAME_OUTPUT));
         Path gradleProperties = project.getProjectDir().toPath().resolve(Project.GRADLE_PROPERTIES);
         projectInfo
                 .getPropertiesPath()

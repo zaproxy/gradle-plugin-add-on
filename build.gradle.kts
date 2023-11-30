@@ -2,11 +2,8 @@ plugins {
     `kotlin-dsl`
     id("com.gradle.plugin-publish") version "1.2.0"
 
-    id("com.diffplug.spotless") version "6.20.0"
-}
-
-repositories {
-    mavenCentral()
+    id("com.diffplug.spotless")
+    id("org.zaproxy.common")
 }
 
 group = "org.zaproxy.gradle"
@@ -24,7 +21,7 @@ dependencies {
     val jgitVersion = "5.6.0.201912101111-r"
     implementation("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
     implementation("org.eclipse.jgit:org.eclipse.jgit.archive:$jgitVersion")
-    implementation("org.zaproxy:zap-clientapi:1.12.0")
+    implementation("org.zaproxy:zap-clientapi:1.13.0")
     implementation("org.kohsuke:github-api:1.95")
     // Include annotations used by the above library to avoid compiler warnings.
     compileOnly("com.google.code.findbugs:findbugs-annotations:3.0.1")
@@ -52,11 +49,6 @@ kotlin {
     jvmToolchain(11)
 }
 
-tasks.withType<JavaCompile>().configureEach {
-    options.encoding = "UTF-8"
-    options.compilerArgs = listOf("-Xlint:all", "-Xlint:-path", "-Xlint:-options", "-Werror")
-}
-
 gradlePlugin {
     website.set("https://github.com/zaproxy/gradle-plugin-add-on")
     vcsUrl.set("https://github.com/zaproxy/gradle-plugin-add-on.git")
@@ -72,11 +64,6 @@ gradlePlugin {
 }
 
 spotless {
-    java {
-        licenseHeaderFile("gradle/spotless/license.java")
-        googleJavaFormat("1.17.0").aosp()
-    }
-
     kotlin {
         ktlint()
     }

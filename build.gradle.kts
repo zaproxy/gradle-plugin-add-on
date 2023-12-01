@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "org.zaproxy.gradle"
-version = "0.10.0"
+version = "0.11.0-SNAPSHOT"
 
 dependencies {
     implementation("commons-codec:commons-codec:1.15")

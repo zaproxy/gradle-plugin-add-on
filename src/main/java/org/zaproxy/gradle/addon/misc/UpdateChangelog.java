@@ -194,7 +194,7 @@ public class UpdateChangelog extends DefaultTask {
     }
 
     private String addChange(StringBuilder versionContents) {
-        String normalisedChange = change.get().replaceAll("\r\n?", "\n") + '\n';
+        String normalisedChange = change.get().replaceAll("\r?\n", "\n") + '\n';
         if (!isDuplicate()) {
             String contents = versionContents.toString();
             if (contents.contains(normalisedChange)) {
@@ -212,7 +212,7 @@ public class UpdateChangelog extends DefaultTask {
         }
         versionContents.insert(insertPosition, normalisedChange);
 
-        return versionContents.toString();
+        return versionContents.toString().trim() + "\n\n";
     }
 
     private boolean isDuplicate() {

@@ -1,7 +1,7 @@
 plugins {
-    id("org.zaproxy.common.settings") version "0.2.0"
+    id("org.zaproxy.common.settings") version "0.3.0"
 
-    id("com.diffplug.spotless") version "6.20.0" apply false
+    id("com.diffplug.spotless") version "6.25.0" apply false
 }
 
 rootProject.name = "gradle-plugin-add-on"
@@ -10,7 +10,10 @@ include("apigen")
 
 rootProject.children.forEach { project -> setUpProject(settingsDir, project) }
 
-fun setUpProject(parentDir: File, project: ProjectDescriptor) {
+fun setUpProject(
+    parentDir: File,
+    project: ProjectDescriptor,
+) {
     project.projectDir = File(parentDir, project.name)
     project.buildFileName = "${project.name}.gradle.kts"
 

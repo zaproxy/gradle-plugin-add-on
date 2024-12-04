@@ -24,10 +24,9 @@ import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.options.MutableDataSet;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import org.gradle.api.DefaultTask;
@@ -80,10 +79,7 @@ public class ConvertMarkdownToHtml extends DefaultTask {
         Parser parser = Parser.builder(options).build();
         HtmlRenderer renderer = HtmlRenderer.builder(options).build();
 
-        String changes =
-                new String(
-                        Files.readAllBytes(markdown.get().getAsFile().toPath()),
-                        StandardCharsets.UTF_8);
+        String changes = Files.readString(markdown.get().getAsFile().toPath());
         try (Writer writer = Files.newBufferedWriter(html.get().getAsFile().toPath())) {
             renderer.render(parser.parse(changes), writer);
         }

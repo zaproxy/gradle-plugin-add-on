@@ -120,7 +120,7 @@ public abstract class PrepareAddOnNextDevIter extends UpdateChangelogNextDevIter
         }
 
         try {
-            return Version.valueOf(version).incrementMinorVersion().toString();
+            return Version.parse(version).nextMinorVersion().toString();
         } catch (IllegalArgumentException | ParseException e) {
             throw new InvalidUserDataException(
                     "Failed to parse the current version: " + version, e);

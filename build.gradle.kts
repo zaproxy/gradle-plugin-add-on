@@ -7,28 +7,28 @@ plugins {
 }
 
 group = "org.zaproxy.gradle"
-version = "0.12.0-SNAPSHOT"
+version = "0.12.0"
 
 dependencies {
-    implementation("commons-codec:commons-codec:1.15")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.9")
-    val flexmarkVersion = "0.42.8"
+    implementation("commons-codec:commons-codec:1.17.1")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.2")
+    val flexmarkVersion = "0.64.8"
     implementation("com.vladsch.flexmark:flexmark-java:$flexmarkVersion")
     implementation("com.vladsch.flexmark:flexmark-ext-gfm-strikethrough:$flexmarkVersion")
     implementation("com.vladsch.flexmark:flexmark-ext-gfm-tasklist:$flexmarkVersion")
     implementation("com.vladsch.flexmark:flexmark-ext-tables:$flexmarkVersion")
-    implementation("io.github.classgraph:classgraph:4.8.36")
-    val jgitVersion = "5.6.0.201912101111-r"
+    implementation("io.github.classgraph:classgraph:4.8.179")
+    val jgitVersion = "7.1.0.202411261347-r"
     implementation("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
     implementation("org.eclipse.jgit:org.eclipse.jgit.archive:$jgitVersion")
     implementation("org.zaproxy:zap-clientapi:1.14.0")
-    implementation("org.kohsuke:github-api:1.95")
+    implementation("org.kohsuke:github-api:1.326")
     // Include annotations used by the above library to avoid compiler warnings.
     compileOnly("com.google.code.findbugs:findbugs-annotations:3.0.1")
     compileOnly("com.infradna.tool:bridge-method-annotation:1.18") {
         exclude(group = "org.jenkins-ci")
     }
-    implementation("com.github.zafarkhaja:java-semver:0.9.0")
+    implementation("com.github.zafarkhaja:java-semver:0.10.2")
 }
 
 tasks.jar {
@@ -41,12 +41,13 @@ tasks.jar {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    val javaVersion = JavaVersion.VERSION_17
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 gradlePlugin {

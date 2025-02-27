@@ -26,7 +26,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import javax.inject.Inject;
 import org.gradle.api.Project;
+import org.gradle.api.file.ConfigurableFileTree;
+import org.gradle.api.file.FileSystemOperations;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.Input;
@@ -46,9 +50,11 @@ public class CopyAddOn extends Copy {
     private static final String DEFAULT_DIR_PATH = "../zaproxy/zap/src/main/dist/plugin/";
 
     private final Property<String> addOnId;
+    private final ObjectFactory objects;
 
     public CopyAddOn() {
         Project project = getProject();
+        objects = project.getObjects();
         addOnId = project.getObjects().property(String.class);
 
         from(project.getTasks().named("jarZapAddOn"));
@@ -81,6 +87,11 @@ public class CopyAddOn extends Copy {
                         });
     }
 
+    @Inject
+    protected FileSystemOperations getFs() {
+        throw new UnsupportedOperationException();
+    }
+
     @Input
     public Property<String> getAddOnId() {
         return addOnId;
@@ -93,17 +104,10 @@ public class CopyAddOn extends Copy {
 
     @Override
     public void copy() {
-        Project project = getProject();
-        project.delete(
-                project.fileTree(
-                                getDestinationDir(),
-                                tree -> {
-                                    tree.include(
-                                            getAddOnId().get()
-                                                    + "-*."
-                                                    + Constants.ADD_ON_FILE_EXTENSION);
-                                })
-                        .getFiles());
+        ConfigurableFileTree tree = objects.fileTree().from(getDestinationDir());
+        tree.include(getAddOnId().get() + "-*." + Constants.ADD_ON_FILE_EXTENSION);
+        getFs().delete(spec -> spec.delete(tree.getFiles()));
+
         super.copy();
     }
 }

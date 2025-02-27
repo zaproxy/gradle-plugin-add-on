@@ -22,9 +22,11 @@ package org.zaproxy.gradle.addon.misc;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 import org.apache.commons.lang3.SystemUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.FileSystemOperations;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
@@ -66,6 +68,11 @@ public class DeployAddOn extends DefaultTask {
         addOn = objects.fileProperty();
         files = getProject().files();
         deleteStale = objects.property(Boolean.class).value(true);
+    }
+
+    @Inject
+    protected FileSystemOperations getFs() {
+        throw new UnsupportedOperationException();
     }
 
     @Option(option = "zap-home-dir", description = "The file system path to the ZAP home.")
@@ -116,11 +123,10 @@ public class DeployAddOn extends DefaultTask {
                                                 homeDir.get(),
                                                 fileDetails.getRelativePath().toString()));
                             });
-            getProject().delete(filesToDelete);
+            getFs().delete(spec -> spec.delete(filesToDelete));
         }
 
-        getProject()
-                .copy(
+        getFs().copy(
                         copySpec -> {
                             copySpec.from(addOn, copySpecAddOn -> copySpecAddOn.into(PLUGIN_DIR));
                             copySpec.from(files);

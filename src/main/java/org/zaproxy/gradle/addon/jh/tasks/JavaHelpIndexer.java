@@ -40,6 +40,7 @@ import javax.xml.xpath.XPathFactory;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.FileSystemOperations;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.model.ObjectFactory;
@@ -105,6 +106,11 @@ public class JavaHelpIndexer extends SourceTask {
 
     @Inject
     protected ExecOperations getExecOperations() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Inject
+    protected FileSystemOperations getFs() {
         throw new UnsupportedOperationException();
     }
 
@@ -213,7 +219,8 @@ public class JavaHelpIndexer extends SourceTask {
     }
 
     private void prepareWorkingDirectory(File wd) {
-        getProject().delete(wd);
+        getFs().delete(spec -> spec.delete(wd));
+
         try {
             Files.createDirectories(wd.toPath());
         } catch (IOException e) {

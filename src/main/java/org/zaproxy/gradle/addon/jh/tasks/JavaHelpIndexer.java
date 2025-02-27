@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
@@ -53,6 +54,7 @@ import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.process.ExecOperations;
 import org.gradle.process.ExecResult;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -99,6 +101,11 @@ public class JavaHelpIndexer extends SourceTask {
         this.helpset = objects.fileProperty();
         this.destinationDir = objects.directoryProperty();
         include("**/*.html");
+    }
+
+    @Inject
+    protected ExecOperations getExecOperations() {
+        throw new UnsupportedOperationException();
     }
 
     @InputFile
@@ -155,7 +162,7 @@ public class JavaHelpIndexer extends SourceTask {
         args.add(conf.getAbsolutePath());
 
         ExecResult result =
-                getProject()
+                getExecOperations()
                         .javaexec(
                                 spec -> {
                                     spec.setClasspath(classpath)

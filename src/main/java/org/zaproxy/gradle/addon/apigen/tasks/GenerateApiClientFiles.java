@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import javax.inject.Inject;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
@@ -42,6 +43,7 @@ import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.process.ExecOperations;
 
 /** A task to generate the API client files of an add-on. */
 public class GenerateApiClientFiles extends DefaultTask {
@@ -57,16 +59,22 @@ public class GenerateApiClientFiles extends DefaultTask {
     private final Property<File> baseDir;
     private final Property<String> language;
     private final ConfigurableFileCollection classpath;
+    private final ObjectFactory objects;
 
     public GenerateApiClientFiles() {
-        ObjectFactory objects = getProject().getObjects();
+        objects = getProject().getObjects();
         api = objects.property(String.class);
         options = objects.property(String.class);
         messages = objects.fileProperty();
         baseDir = objects.property(File.class);
         baseDir.set(getProject().getRootDir().getParentFile());
         language = objects.property(String.class).value(ALL_LANGUAGES);
-        classpath = getProject().files();
+        classpath = objects.fileCollection();
+    }
+
+    @Inject
+    protected ExecOperations getExecOperations() {
+        throw new UnsupportedOperationException();
     }
 
     @Input
@@ -138,10 +146,11 @@ public class GenerateApiClientFiles extends DefaultTask {
             conf.store(out, null);
         }
 
-        getProject()
+        getExecOperations()
                 .javaexec(
                         spec -> {
-                            spec.setClasspath(getProject().files(classpath, apiGenJar.toFile()));
+                            spec.setClasspath(
+                                    objects.fileCollection().from(classpath, apiGenJar.toFile()));
                             spec.setWorkingDir(wd.toFile());
                             spec.getMainClass().set("org.zaproxy.zap.extension.api.ApiGenerator");
                         });

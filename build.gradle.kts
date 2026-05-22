@@ -9,6 +9,19 @@ plugins {
 group = "org.zaproxy.gradle"
 version = "0.13.1"
 
+val functionalTest by sourceSets.creating {
+    compileClasspath += sourceSets.main.get().output
+    runtimeClasspath += sourceSets.main.get().output
+}
+
+val functionalTestImplementation by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
+
+val functionalTestRuntimeOnly by configurations.getting {
+    extendsFrom(configurations.testRuntimeOnly.get())
+}
+
 dependencies {
     implementation("commons-codec:commons-codec:1.17.1")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.2")
@@ -29,6 +42,23 @@ dependencies {
         exclude(group = "org.jenkins-ci")
     }
     implementation("com.github.zafarkhaja:java-semver:0.10.2")
+    testImplementation("org.assertj:assertj-core:3.27.7")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+val functionalTestTask =
+    tasks.register<Test>("functionalTest") {
+        description = "Runs the functional tests."
+        group = "verification"
+        testClassesDirs = functionalTest.output.classesDirs
+        classpath = functionalTest.runtimeClasspath
+        useJUnitPlatform()
+        mustRunAfter(tasks.test)
+    }
+
+tasks.check {
+    dependsOn(functionalTestTask)
 }
 
 tasks.jar {
@@ -62,6 +92,7 @@ gradlePlugin {
             tags.set(listOf("zap", "zaproxy"))
         }
     }
+    testSourceSets(functionalTest)
 }
 
 spotless {

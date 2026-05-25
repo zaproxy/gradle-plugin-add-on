@@ -43,17 +43,7 @@ class GenerateManifestFunctionalTest extends FunctionalTest {
 
     @Override
     protected void buildFile(String content) throws Exception {
-        super.buildFile(
-                """
-                plugins {
-                    java
-                    id("org.zaproxy.add-on")
-                }
-                repositories {
-                    mavenCentral()
-                }
-                """
-                        + content);
+        buildFileWithPluginSetup(content);
     }
 
     @Test

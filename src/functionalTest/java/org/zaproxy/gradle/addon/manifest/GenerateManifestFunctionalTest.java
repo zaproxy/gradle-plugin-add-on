@@ -22,6 +22,7 @@ package org.zaproxy.gradle.addon.manifest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Path;
+import java.util.stream.Stream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -30,7 +31,9 @@ import javax.xml.xpath.XPathFactory;
 import org.gradle.testkit.runner.BuildResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.zaproxy.gradle.addon.AddOnStatus;
@@ -152,7 +155,7 @@ class GenerateManifestFunctionalTest extends FunctionalTest {
                             addOns {
                                 register("requiredaddon") {
                                     version.set("1.0.0")
-                                    semVer.set("1.0.0")
+                                    semVer.set("1.1.0")
                                     notBeforeVersion.set(5)
                                     notFromVersion.set(10)
                                 }
@@ -176,7 +179,7 @@ class GenerateManifestFunctionalTest extends FunctionalTest {
         assertThat(xpath(doc, "/zapaddon/dependencies/addons/addon[2]/id"))
                 .isEqualTo("requiredaddon");
         assertThat(xpath(doc, "/zapaddon/dependencies/addons/addon[2]/version")).isEqualTo("1.0.0");
-        assertThat(xpath(doc, "/zapaddon/dependencies/addons/addon[2]/semver")).isEqualTo("1.0.0");
+        assertThat(xpath(doc, "/zapaddon/dependencies/addons/addon[2]/semver")).isEqualTo("1.1.0");
         assertThat(xpath(doc, "/zapaddon/dependencies/addons/addon[2]/not-before-version"))
                 .isEqualTo("5");
         assertThat(xpath(doc, "/zapaddon/dependencies/addons/addon[2]/not-from-version"))
@@ -531,6 +534,163 @@ class GenerateManifestFunctionalTest extends FunctionalTest {
         assertThat(result.getOutput()).contains("Only one type of changes property must be set.");
     }
 
+    private static Stream<Arguments> invalidVersionConstraintsForProperty() {
+        return Stream.of("semVer", "version")
+                .flatMap(
+                        p ->
+                                Stream.of(">= 1.*", "not-a-range", "> abc")
+                                        .map(c -> Arguments.of(p, c)));
+    }
+
+    private static Stream<Arguments> validVersionConstraintsForProperty() {
+        return Stream.of("semVer", "version")
+                .flatMap(
+                        p ->
+                                Stream.of(
+                                                "1.0.0",
+                                                ">= 1.0.0",
+                                                "> 2.0.1 && < 3.0.0",
+                                                "= 1.0.0 || = 2.0.0",
+                                                "1.*")
+                                        .map(c -> Arguments.of(p, c)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidVersionConstraintsForProperty")
+    void shouldFailWhenAddOnDependencyHasInvalidVersionConstraint(
+            String property, String constraint) throws Exception {
+        // Given
+        buildFile(
+                """
+                version = "1"
+                zapAddOn {
+                    addOnName.set("Test Add-On")
+                    manifest {
+                        dependencies {
+                            addOns {
+                                register("example") {
+                                    %s.set("%s")
+                                }
+                            }
+                        }
+                    }
+                }
+                """
+                        .formatted(property, constraint));
+
+        // When
+        BuildResult result = buildAndFail(GENERATE_MANIFEST_TASK);
+
+        // Then
+        assertTaskFailed(result, GENERATE_MANIFEST_TASK);
+        assertThat(result.getOutput())
+                .contains(
+                        "Invalid version constraint for add-on dependency 'example': "
+                                + constraint);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidVersionConstraintsForProperty")
+    void shouldFailWhenExtensionAddOnDependencyHasInvalidVersionConstraint(
+            String property, String constraint) throws Exception {
+        // Given
+        buildFile(
+                """
+                version = "1"
+                zapAddOn {
+                    addOnName.set("Test Add-On")
+                    manifest {
+                        extensions {
+                            register("com.example.MyExtension") {
+                                dependencies {
+                                    addOns {
+                                        register("example") {
+                                            %s.set("%s")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                """
+                        .formatted(property, constraint));
+
+        // When
+        BuildResult result = buildAndFail(GENERATE_MANIFEST_TASK);
+
+        // Then
+        assertTaskFailed(result, GENERATE_MANIFEST_TASK);
+        assertThat(result.getOutput())
+                .contains(
+                        "Invalid version constraint for add-on dependency 'example' in extension 'com.example.MyExtension': "
+                                + constraint);
+    }
+
+    @ParameterizedTest
+    @MethodSource("validVersionConstraintsForProperty")
+    void shouldGenerateManifestWhenAddOnDependencyHasValidVersionConstraint(
+            String property, String constraint) throws Exception {
+        // Given
+        buildFile(
+                """
+                version = "1"
+                zapAddOn {
+                    addOnName.set("Test Add-On")
+                    manifest {
+                        dependencies {
+                            addOns {
+                                register("example") {
+                                    %s.set("%s")
+                                }
+                            }
+                        }
+                    }
+                }
+                """
+                        .formatted(property, constraint));
+
+        // When
+        BuildResult result = build(GENERATE_MANIFEST_TASK);
+
+        // Then
+        assertTaskSuccess(result, GENERATE_MANIFEST_TASK);
+    }
+
+    @ParameterizedTest
+    @MethodSource("validVersionConstraintsForProperty")
+    void shouldGenerateManifestWhenExtensionAddOnDependencyHasValidVersionConstraint(
+            String property, String constraint) throws Exception {
+        // Given
+        buildFile(
+                """
+                version = "1"
+                zapAddOn {
+                    addOnName.set("Test Add-On")
+                    manifest {
+                        extensions {
+                            register("com.example.MyExtension") {
+                                dependencies {
+                                    addOns {
+                                        register("example") {
+                                            %s.set("%s")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                """
+                        .formatted(property, constraint));
+
+        // When
+        BuildResult result = build(GENERATE_MANIFEST_TASK);
+
+        // Then
+        assertTaskSuccess(result, GENERATE_MANIFEST_TASK);
+    }
+
     @Test
     void shouldIncludeExtensionsInManifest() throws Exception {
         // Given
@@ -580,7 +740,7 @@ class GenerateManifestFunctionalTest extends FunctionalTest {
                                     addOns {
                                         register("requiredaddon") {
                                             version.set("1.0.0")
-                                            semVer.set("1.0.0")
+                                            semVer.set("1.1.0")
                                             notBeforeVersion.set(5)
                                             notFromVersion.set(10)
                                         }
@@ -617,7 +777,7 @@ class GenerateManifestFunctionalTest extends FunctionalTest {
                         xpath(
                                 doc,
                                 "/zapaddon/extensions/extension[1]/dependencies/addons/addon[1]/semver"))
-                .isEqualTo("1.0.0");
+                .isEqualTo("1.1.0");
         assertThat(
                         xpath(
                                 doc,

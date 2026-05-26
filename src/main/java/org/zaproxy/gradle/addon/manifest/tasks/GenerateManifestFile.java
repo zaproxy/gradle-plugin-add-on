@@ -22,6 +22,8 @@ package org.zaproxy.gradle.addon.manifest.tasks;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.util.DefaultXmlPrettyPrinter;
+import com.github.zafarkhaja.semver.ParseException;
+import com.github.zafarkhaja.semver.expr.ExpressionParser;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
@@ -39,6 +41,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
@@ -65,6 +69,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.zaproxy.gradle.addon.AddOnStatus;
 import org.zaproxy.gradle.addon.internal.Constants;
 import org.zaproxy.gradle.addon.internal.DefaultIndenter;
+import org.zaproxy.gradle.addon.manifest.AddOn;
 import org.zaproxy.gradle.addon.manifest.Bundle;
 import org.zaproxy.gradle.addon.manifest.BundledLibs;
 import org.zaproxy.gradle.addon.manifest.Classnames;
@@ -369,6 +374,8 @@ public class GenerateManifestFile extends DefaultTask {
             throw new InvalidUserDataException("Only one type of changes property must be set.");
         }
 
+        validateVersionConstraints();
+
         try (Writer w = Files.newBufferedWriter(getManifest().get().getAsFile().toPath())) {
             DefaultXmlPrettyPrinter.Indenter indenter = new DefaultIndenter();
             DefaultXmlPrettyPrinter printer = new DefaultXmlPrettyPrinter();
@@ -648,6 +655,59 @@ public class GenerateManifestFile extends DefaultTask {
                 .stream()
                 .map(ClassInfo::getName)
                 .collect(() -> list, List::add, List::addAll);
+    }
+
+    private void validateVersionConstraints() {
+        validateVersionConstraints(getDependencies());
+        extensions.forEach(
+                ext -> validateVersionConstraints(ext.getDependencies(), ext.getClassname()));
+    }
+
+    private static void validateVersionConstraints(Property<Dependencies> dependencies) {
+        if (dependencies.isPresent()) {
+            validateVersionConstraints(
+                    dependencies.get().getAddOns(), id -> () -> "add-on dependency '" + id + "'");
+        }
+    }
+
+    private static void validateVersionConstraints(
+            Property<Extension.Dependencies> dependencies, String extensionClassname) {
+        if (dependencies.isPresent()) {
+            validateVersionConstraints(
+                    dependencies.get().getAddOns(),
+                    id ->
+                            () ->
+                                    "add-on dependency '"
+                                            + id
+                                            + "' in extension '"
+                                            + extensionClassname
+                                            + "'");
+        }
+    }
+
+    private static void validateVersionConstraints(
+            NamedDomainObjectContainer<AddOn> addOns,
+            Function<String, Supplier<String>> contextFor) {
+        addOns.forEach(
+                addOn -> {
+                    Supplier<String> context = contextFor.apply(addOn.getId());
+                    validateVersionConstraint(context, addOn.getVersion());
+                    validateVersionConstraint(context, addOn.getSemVer());
+                });
+    }
+
+    private static void validateVersionConstraint(
+            Supplier<String> context, Property<String> versionRange) {
+        if (!versionRange.isPresent()) {
+            return;
+        }
+        String range = versionRange.get();
+        try {
+            ExpressionParser.newInstance().parse(range);
+        } catch (ParseException e) {
+            throw new InvalidUserDataException(
+                    "Invalid version constraint for " + context.get() + ": " + range, e);
+        }
     }
 
     private static String readContents(Path file) throws IOException {

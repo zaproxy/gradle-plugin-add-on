@@ -38,6 +38,10 @@ public abstract class FunctionalTest {
         Files.writeString(file, content);
     }
 
+    protected void settingsFile(String content) throws Exception {
+        createFile(content, projectDir.resolve("settings.gradle.kts"));
+    }
+
     protected void buildFile(String content) throws Exception {
         createFile(content, projectDir.resolve("build.gradle.kts"));
     }
@@ -64,6 +68,10 @@ public abstract class FunctionalTest {
 
     protected static void assertTaskFailed(BuildResult result, String taskName) {
         assertTaskOutcome(result, taskName, TaskOutcome.FAILED);
+    }
+
+    protected static void assertTaskUpToDate(BuildResult result, String taskName) {
+        assertTaskOutcome(result, taskName, TaskOutcome.UP_TO_DATE);
     }
 
     private static void assertTaskOutcome(

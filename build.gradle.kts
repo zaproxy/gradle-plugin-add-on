@@ -45,6 +45,8 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.27.7")
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    functionalTestImplementation("org.nanohttpd:nanohttpd:2.3.1")
+    functionalTestImplementation("commons-io:commons-io:2.22.0")
 }
 
 val functionalTestTask =

@@ -66,7 +66,9 @@ tasks.check {
 tasks.jar {
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
+}
 
+tasks.processResources {
     into("org/zaproxy/gradle/addon/apigen/") {
         from(provider({ project(":apigen").tasks.named<Jar>("jar").flatMap { it.archiveFile } }))
     }

@@ -43,7 +43,37 @@ public abstract class FunctionalTest {
     }
 
     protected void buildFile(String content) throws Exception {
+        createBuildFile(content);
+    }
+
+    private final void createBuildFile(String content) throws Exception {
         createFile(content, projectDir.resolve("build.gradle.kts"));
+    }
+
+    protected final void buildFileWithPluginSetup(String content) throws Exception {
+        createBuildFile(
+                """
+                plugins {
+                    java
+                    id("org.zaproxy.add-on")
+                }
+                repositories {
+                    mavenCentral()
+                }
+                """
+                        + content);
+    }
+
+    protected final void buildFileWithAddOnSetup(String content) throws Exception {
+        buildFileWithPluginSetup(
+                """
+                version = "1"
+                zapAddOn {
+                    zapVersion.set("2.17.0")
+                    addOnName.set("Test Add-On")
+                }
+                """
+                        + content);
     }
 
     protected BuildResult build(String... arguments) throws Exception {
